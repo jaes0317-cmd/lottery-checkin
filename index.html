@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活動抽獎報到</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 32px 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    h2 { margin-top: 0; margin-bottom: 24px; font-size: 24px; }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 16px;
+      background-color: #2c2c2c;
+      color: #ffffff;
+      border: 2px solid #444;
+      border-radius: 10px;
+      font-size: 18px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    input[type="text"]:focus { border-color: #0d6efd; outline: none; }
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled { background-color: #555; cursor: not-allowed; }
+    #msg { margin-top: 20px; font-size: 16px; font-weight: bold; min-height: 24px; }
+    .ok { color: #20c997; }
+    .err { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>抽獎報到登記</h2>
+    <input type="text" id="empId" placeholder="請輸入您的工號" autocomplete="off">
+    <button id="submitBtn" onclick="submitForm()">確認登記</button>
+    <div id="msg"></div>
+  </div>
+
+  <script>
+    // ★ 把這裡換成你的 GAS 部署網址
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzNf1tQE0bocXREY_f3yIA950tkdr9_wGL16xXjr_Ts0-OLONgcdVl3i2E7-MzHkVu4cw/exec';
+
+    // 支援按 Enter 直接送出
+    document.getElementById('empId').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') submitForm();
+    });
+
+    async function submitForm() {
+      const input = document.getElementById('empId');
+      const btn = document.getElementById('submitBtn');
+      const msg = document.getElementById('msg');
+      const empId = input.value.trim();
+
+      if (!empId) {
+        msg.className = 'err';
+        msg.innerText = '請先輸入工號';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = '資料寫入中...';
+      msg.innerText = '';
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: {
+            // 刻意用 text/plain 避開 GAS 的 CORS preflight 限制
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({ empId: empId })
+        });
+
+        const res = await response.json();
+        msg.className = res.success ? 'ok' : 'err';
+        msg.innerText = res.message;
+        if (res.success) input.value = '';
+      } catch (err) {
+        msg.className = 'err';
+        msg.innerText = '連線失敗，請檢查網路後再試一次';
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '確認登記';
+      }
+    }
+  </script>
+</body>
+</html>
