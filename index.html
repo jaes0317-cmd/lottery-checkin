@@ -96,7 +96,7 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co/';
+    const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
     document.getElementById('empId').addEventListener('keypress', function(e) {
@@ -139,7 +139,7 @@
           msg.innerText = `工號 ${empId} 已經登記過了，請勿重複送出！`;
         } else {
           msg.className = 'err';
-          msg.innerText = '登記失敗，請稍後再試一次';
+          msg.innerText = `登記失敗 (錯誤碼 ${response.status})，請稍後再試`;
         }
       } catch (err) {
         msg.className = 'err';
