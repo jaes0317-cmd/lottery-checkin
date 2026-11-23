@@ -26,18 +26,17 @@
       max-width: 360px;
       text-align: center;
     }
-    /* 新增：LOGO 與文字底部對齊區塊 */
     .brand-header {
       display: flex;
-      align-items: flex-end;     /* 關鍵：讓圖片與文字底部對齊 */
+      align-items: flex-end;
       justify-content: center;
-      gap: 10px;                 /* LOGO 與文字的間距 */
+      gap: 10px;
       margin-bottom: 20px;
       padding-bottom: 16px;
-      border-bottom: 1px solid #333; /* 加上一條細分隔線更有層次感 */
+      border-bottom: 1px solid #333;
     }
     .brand-logo {
-      height: 36px;              /* 可依你的 LOGO 比例微調高度 */
+      height: 36px;
       width: auto;
       display: block;
     }
@@ -45,7 +44,7 @@
       font-size: 16px;
       font-weight: 600;
       color: #cccccc;
-      line-height: 1.1;          /* 讓文字貼齊底部基準線 */
+      line-height: 1.1;
     }
     h2 { margin-top: 0; margin-bottom: 24px; font-size: 24px; }
     input[type="text"] {
@@ -93,7 +92,6 @@
   </div>
 
   <script>
-    // ★ 記得換成你的 GAS 部署網址
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzNf1tQE0bocXREY_f3yIA950tkdr9_wGL16xXjr_Ts0-OLONgcdVl3i2E7-MzHkVu4cw/exec';
 
     document.getElementById('empId').addEventListener('keypress', function(e) {
