@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>活動抽獎報到</title>
+  <title>TW1 抽獎報到登記</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -25,6 +25,27 @@
       width: 100%;
       max-width: 360px;
       text-align: center;
+    }
+    /* 新增：LOGO 與文字底部對齊區塊 */
+    .brand-header {
+      display: flex;
+      align-items: flex-end;     /* 關鍵：讓圖片與文字底部對齊 */
+      justify-content: center;
+      gap: 10px;                 /* LOGO 與文字的間距 */
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #333; /* 加上一條細分隔線更有層次感 */
+    }
+    .brand-logo {
+      height: 36px;              /* 可依你的 LOGO 比例微調高度 */
+      width: auto;
+      display: block;
+    }
+    .brand-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #cccccc;
+      line-height: 1.1;          /* 讓文字貼齊底部基準線 */
     }
     h2 { margin-top: 0; margin-bottom: 24px; font-size: 24px; }
     input[type="text"] {
@@ -59,6 +80,12 @@
 </head>
 <body>
   <div class="card">
+    <!-- LOGO 與文字區塊 -->
+    <div class="brand-header">
+      <img src="logo.png" alt="公司 LOGO" class="brand-logo">
+      <span class="brand-text">TW1 抽獎報到測試</span>
+    </div>
+
     <h2>抽獎報到登記</h2>
     <input type="text" id="empId" placeholder="請輸入您的工號" autocomplete="off">
     <button id="submitBtn" onclick="submitForm()">確認登記</button>
@@ -66,10 +93,9 @@
   </div>
 
   <script>
-    // ★ 把這裡換成你的 GAS 部署網址
+    // ★ 記得換成你的 GAS 部署網址
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzNf1tQE0bocXREY_f3yIA950tkdr9_wGL16xXjr_Ts0-OLONgcdVl3i2E7-MzHkVu4cw/exec';
 
-    // 支援按 Enter 直接送出
     document.getElementById('empId').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') submitForm();
     });
@@ -94,7 +120,6 @@
         const response = await fetch(GAS_API_URL, {
           method: 'POST',
           headers: {
-            // 刻意用 text/plain 避開 GAS 的 CORS preflight 限制
             'Content-Type': 'text/plain;charset=utf-8'
           },
           body: JSON.stringify({ empId: empId })
