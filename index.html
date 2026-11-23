@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TW1 抽獎報到登記</title>
+  <title>TW1 尾牙活動報到抽獎</title>
+  <link rel="preload" as="image" href="logo.png">
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -34,17 +35,21 @@
       margin-bottom: 20px;
       padding-bottom: 16px;
       border-bottom: 1px solid #333;
+      min-height: 32px;
     }
     .brand-logo {
-      height: 36px;
-      width: auto;
+      width: 95px;
+      height: 32px;
+      object-fit: contain;
       display: block;
+      flex-shrink: 0;
     }
     .brand-text {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       color: #cccccc;
       line-height: 1.1;
+      white-space: nowrap;
     }
     h2 { margin-top: 0; margin-bottom: 24px; font-size: 24px; }
     input[type="text"] {
@@ -79,10 +84,9 @@
 </head>
 <body>
   <div class="card">
-
     <div class="brand-header">
-      <img src="logo.png" alt="公司 LOGO" class="brand-logo">
-      <span class="brand-text">TW1 抽獎報到測試</span>
+      <img src="logo.png" alt="DELTA" class="brand-logo" width="95" height="32" decoding="sync">
+      <span class="brand-text">TW1 尾牙活動報到抽獎 (測試)</span>
     </div>
 
     <h2>抽獎報到登記</h2>
@@ -92,7 +96,8 @@
   </div>
 
   <script>
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzNf1tQE0bocXREY_f3yIA950tkdr9_wGL16xXjr_Ts0-OLONgcdVl3i2E7-MzHkVu4cw/exec';
+    const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co/rest/v1/';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
     document.getElementById('empId').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') submitForm();
@@ -102,7 +107,7 @@
       const input = document.getElementById('empId');
       const btn = document.getElementById('submitBtn');
       const msg = document.getElementById('msg');
-      const empId = input.value.trim();
+      const empId = input.value.trim().toUpperCase();
 
       if (!empId) {
         msg.className = 'err';
@@ -115,18 +120,27 @@
       msg.innerText = '';
 
       try {
-        const response = await fetch(GAS_API_URL, {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/checkins`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ empId: empId })
+          body: JSON.stringify({ emp_id: empId })
         });
 
-        const res = await response.json();
-        msg.className = res.success ? 'ok' : 'err';
-        msg.innerText = res.message;
-        if (res.success) input.value = '';
+        if (response.status === 201) {
+          msg.className = 'ok';
+          msg.innerText = `工號 ${empId} 登記成功！祝您中獎！`;
+          input.value = '';
+        } else if (response.status === 409) {
+          msg.className = 'err';
+          msg.innerText = `工號 ${empId} 已經登記過了，請勿重複送出！`;
+        } else {
+          msg.className = 'err';
+          msg.innerText = '登記失敗，請稍後再試一次';
+        }
       } catch (err) {
         msg.className = 'err';
         msg.innerText = '連線失敗，請檢查網路後再試一次';
