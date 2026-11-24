@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TW1 尾牙活動報到抽獎</title>
+  <title>TW1 尾牙活動報名抽獎</title>
+  <!-- 輕量級網頁 QR Code 掃描套件 -->
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -12,11 +14,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
       padding: 20px;
       box-sizing: border-box;
-      overflow: hidden;
+      overflow-x: hidden;
       position: relative;
     }
 
@@ -28,50 +30,31 @@
       z-index: 0;
       pointer-events: none;
     }
-
     .fog-blob {
       position: absolute;
       filter: blur(48px);
       will-change: transform, opacity;
       mix-blend-mode: screen;
     }
-
-    /* 煙霧 1：台達科技藍 */
     .fog-1 {
-      width: 460px;
-      height: 300px;
+      width: 460px; height: 300px;
       border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
       background: radial-gradient(ellipse at center, rgba(0, 150, 255, 0.7) 0%, rgba(0, 80, 180, 0.25) 50%, rgba(0, 0, 0, 0) 75%);
-      top: 50%;
-      left: 50%;
-      margin-top: -220px;
-      margin-left: -280px;
+      top: 50%; left: 50%; margin-top: -220px; margin-left: -280px;
       animation: swirl1 7s ease-in-out infinite alternate;
     }
-
-    /* 煙霧 2：神祕靛紫 */
     .fog-2 {
-      width: 500px;
-      height: 320px;
+      width: 500px; height: 320px;
       border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
       background: radial-gradient(ellipse at center, rgba(130, 50, 255, 0.65) 0%, rgba(65, 20, 150, 0.25) 50%, rgba(0, 0, 0, 0) 75%);
-      top: 50%;
-      left: 50%;
-      margin-top: -100px;
-      margin-left: -180px;
+      top: 50%; left: 50%; margin-top: -100px; margin-left: -180px;
       animation: swirl2 8.5s ease-in-out infinite alternate;
     }
-
-    /* 煙霧 3：冷冽青霧 */
     .fog-3 {
-      width: 560px;
-      height: 220px;
+      width: 560px; height: 220px;
       border-radius: 50%;
       background: radial-gradient(ellipse at center, rgba(0, 225, 255, 0.5) 0%, rgba(0, 120, 160, 0.15) 55%, rgba(0, 0, 0, 0) 75%);
-      top: 50%;
-      left: 50%;
-      margin-top: -110px;
-      margin-left: -280px;
+      top: 50%; left: 50%; margin-top: -110px; margin-left: -280px;
       animation: sweep 6s ease-in-out infinite alternate;
     }
 
@@ -80,49 +63,34 @@
       50%  { transform: translate3d(80px, -20px, 0) rotate(75deg) scale(1.25, 0.9);  opacity: 0.85; }
       100% { transform: translate3d(-40px, 100px, 0) rotate(140deg) scale(1.0, 1.2); opacity: 0.6; }
     }
-
     @keyframes swirl2 {
       0%   { transform: translate3d(110px, 80px, 0) rotate(0deg) scale(1.1, 0.9);     opacity: 0.5; }
       50%  { transform: translate3d(-90px, 30px, 0) rotate(-80deg) scale(0.95, 1.25); opacity: 0.8; }
       100% { transform: translate3d(50px, -110px, 0) rotate(-150deg) scale(1.2, 1.0); opacity: 0.55; }
     }
-
     @keyframes sweep {
       0%   { transform: translate3d(-160px, 40px, 0) rotate(-15deg) scaleX(0.9); opacity: 0.35; }
       50%  { transform: translate3d(0px, -50px, 0) rotate(10deg) scaleX(1.3);    opacity: 0.7; }
       100% { transform: translate3d(160px, 30px, 0) rotate(25deg) scaleX(0.95);  opacity: 0.4; }
     }
 
-    /* === 手機版專屬煙霧強化（讓上下留白處明顯翻湧） === */
     @media (max-width: 600px) {
-      .fog-blob {
-        filter: blur(30px); /* 降低模糊，讓煙霧輪廓更清楚 */
-      }
+      .fog-blob { filter: blur(30px); }
       .fog-1 {
-        width: 300px;
-        height: 200px;
-        margin-top: -320px; /* 移到卡片上方區域 */
-        margin-left: -150px;
+        width: 300px; height: 200px; margin-top: -320px; margin-left: -150px;
         background: radial-gradient(ellipse at center, rgba(0, 160, 255, 0.85) 0%, rgba(0, 90, 200, 0.35) 50%, rgba(0, 0, 0, 0) 75%);
         animation: mobileSwirlTop 5.5s ease-in-out infinite alternate;
       }
       .fog-2 {
-        width: 320px;
-        height: 220px;
-        margin-top: 120px; /* 移到卡片下方區域 */
-        margin-left: -160px;
+        width: 320px; height: 220px; margin-top: 120px; margin-left: -160px;
         background: radial-gradient(ellipse at center, rgba(145, 60, 255, 0.8) 0%, rgba(75, 20, 170, 0.35) 50%, rgba(0, 0, 0, 0) 75%);
         animation: mobileSwirlBottom 6.5s ease-in-out infinite alternate;
       }
       .fog-3 {
-        width: 280px;
-        height: 160px;
-        margin-top: -80px;
-        margin-left: -140px;
+        width: 280px; height: 160px; margin-top: -80px; margin-left: -140px;
         background: radial-gradient(ellipse at center, rgba(0, 235, 255, 0.65) 0%, rgba(0, 130, 170, 0.25) 55%, rgba(0, 0, 0, 0) 75%);
         animation: mobileSweep 5s ease-in-out infinite alternate;
       }
-
       @keyframes mobileSwirlTop {
         0%   { transform: translate3d(-90px, -20px, 0) rotate(0deg) scale(0.85, 1.15); opacity: 0.6; }
         50%  { transform: translate3d(70px, 60px, 0) rotate(70deg) scale(1.2, 0.9);    opacity: 0.95; }
@@ -140,74 +108,57 @@
       }
     }
 
-    /* === 主卡片（毛玻璃微光質感） === */
+    /* === 主卡片 === */
     .card {
       position: relative;
       z-index: 1;
-      background: rgba(20, 22, 28, 0.72);
+      background: rgba(20, 22, 28, 0.75);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 32px 24px;
+      padding: 28px 24px;
       border-radius: 16px;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65), 0 0 35px rgba(0, 140, 255, 0.15);
       width: 100%;
       max-width: 360px;
       text-align: center;
     }
-
     .brand-header {
       display: flex;
       align-items: flex-end;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       min-height: 32px;
     }
-    .brand-logo {
-      width: 95px;
-      height: 32px;
-      object-fit: contain;
-      display: block;
-      flex-shrink: 0;
-    }
-    .brand-text {
-      font-size: 15px;
-      font-weight: 600;
-      color: #d0d4dc;
-      line-height: 1.1;
-      white-space: nowrap;
-    }
-    h2 { margin-top: 0; margin-bottom: 16px; font-size: 24px; letter-spacing: 1px; }
-    #countdownBox {
+    .brand-logo { width: 95px; height: 32px; object-fit: contain; display: block; flex-shrink: 0; }
+    .brand-text { font-size: 15px; font-weight: 600; color: #d0d4dc; line-height: 1.1; white-space: nowrap; }
+    h2 { margin-top: 0; margin-bottom: 16px; font-size: 23px; letter-spacing: 1px; }
+
+    .countdown-box {
       background-color: rgba(42, 36, 23, 0.85);
       border: 1px solid #665222;
       color: #ffd43b;
       padding: 12px;
       border-radius: 10px;
-      margin-bottom: 20px;
-      font-size: 15px;
+      margin-bottom: 16px;
+      font-size: 14px;
       line-height: 1.5;
       display: none;
     }
-    #countdownTimer {
-      font-size: 18px;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-top: 4px;
-    }
+    .countdown-timer { font-size: 17px; font-weight: bold; display: block; margin-top: 4px; }
+
     input[type="text"] {
       width: 100%;
-      padding: 14px;
-      margin-bottom: 16px;
+      padding: 13px;
+      margin-bottom: 12px;
       background-color: rgba(44, 48, 58, 0.75);
       color: #ffffff;
       border: 2px solid rgba(255, 255, 255, 0.12);
       border-radius: 10px;
-      font-size: 18px;
+      font-size: 17px;
       text-align: center;
       box-sizing: border-box;
       transition: border-color 0.2s, box-shadow 0.2s;
@@ -218,6 +169,7 @@
       outline: none;
     }
     input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
+
     button {
       width: 100%;
       padding: 14px;
@@ -225,21 +177,62 @@
       color: white;
       border: none;
       border-radius: 10px;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(13, 110, 253, 0.35);
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: transform 0.15s;
     }
     button:active:not(:disabled) { transform: scale(0.98); }
     button:disabled { background: #444; color: #aaa; box-shadow: none; cursor: not-allowed; }
-    #msg { margin-top: 20px; font-size: 16px; font-weight: bold; min-height: 24px; }
+
+    .btn-green {
+      background: linear-gradient(135deg, #198754, #146c43);
+      box-shadow: 0 4px 15px rgba(25, 135, 84, 0.35);
+    }
+    .btn-cancel {
+      background: #444;
+      box-shadow: none;
+      margin-top: 12px;
+      padding: 10px;
+      font-size: 15px;
+    }
+
+    .switch-link {
+      display: inline-block;
+      margin-top: 16px;
+      color: #8ab4f8;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .user-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 15px;
+      color: #e0e0e0;
+    }
+    .user-badge strong { color: #20c997; font-size: 17px; }
+
+    #reader {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 12px;
+      display: none;
+      border: 2px solid #0d6efd;
+    }
+
+    #msg { margin-top: 18px; font-size: 16px; font-weight: bold; min-height: 24px; line-height: 1.4; }
     .ok { color: #20c997; }
     .err { color: #ff6b6b; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <!-- 強化版動態神祕煙霧層 -->
   <div class="fog-container">
     <div class="fog-blob fog-1"></div>
     <div class="fog-blob fog-2"></div>
@@ -249,18 +242,44 @@
   <div class="card">
     <div class="brand-header">
       <img src="data:image/png;base64,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" alt="DELTA" class="brand-logo" width="95" height="32" decoding="sync">
-      <span class="brand-text">TW1 尾牙活動報到抽獎 (測試)</span>
+      <span class="brand-text">TW1 尾牙活動報名抽獎 (測試)</span>
     </div>
 
-    <h2>報到抽獎登記</h2>
-
-    <div id="countdownBox">
-      距離開放登記還有
-      <span id="countdownTimer">計算中...</span>
+    <!-- ===== 畫面 1：報名表單 ===== -->
+    <div id="regView">
+      <h2>活動報名登記</h2>
+      <div id="regCountdownBox" class="countdown-box">
+        距離開放報名還有
+        <span id="regCountdownTimer" class="countdown-timer">計算中...</span>
+      </div>
+      <input type="text" id="empId" placeholder="請輸入您的工號" autocomplete="off">
+      <input type="text" id="empName" placeholder="請輸入您的姓名" autocomplete="off">
+      <button id="regBtn" onclick="submitReg()">確認報名</button>
+      <div class="switch-link" onclick="switchToCheckin()">已經報名過了？點此直接報到 →</div>
     </div>
 
-    <input type="text" id="empId" placeholder="請輸入您的工號" autocomplete="off">
-    <button id="submitBtn" onclick="submitForm()">確認登記</button>
+    <!-- ===== 畫面 2：現場掃碼報到 ===== -->
+    <div id="checkinView" class="hidden">
+      <h2>現場掃碼報到</h2>
+      <div id="savedUserBadge" class="user-badge hidden">
+        已報名工號：<strong id="badgeEmpId"></strong> <span id="badgeEmpName"></span>
+      </div>
+      <input type="text" id="checkinEmpId" placeholder="請輸入您已報名的工號" autocomplete="off" class="hidden">
+
+      <div id="checkinCountdownBox" class="countdown-box">
+        距離開放現場報到還有
+        <span id="checkinCountdownTimer" class="countdown-timer">計算中...</span>
+      </div>
+
+      <button id="checkinBtn" class="btn-green" onclick="startScanner()">📷 我要報到（掃描 QR Code）</button>
+
+      <!-- 相機掃描區塊 -->
+      <div id="reader"></div>
+      <button id="cancelScanBtn" class="btn-cancel hidden" onclick="stopScanner()">取消掃描</button>
+
+      <div class="switch-link" onclick="switchToReg()">← 返回報名 / 切換工號</div>
+    </div>
+
     <div id="msg"></div>
   </div>
 
@@ -268,71 +287,154 @@
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
-    // ★ 設定開放時間（請與 Supabase SQL 設定一致）
-    const OPEN_TIME = new Date('2026-12-20T17:00:00+08:00');
-    const OPEN_TIME_TEXT = '12/20 17:00';
+    // ★ 請改成與 Supabase SQL 一致的台灣時間
+    const REG_OPEN_TIME = new Date('2026-11-24T14:00:00+08:00');
+    const REG_OPEN_TEXT = '11/24 14:00';
 
-    const inputEl = document.getElementById('empId');
-    const btnEl = document.getElementById('submitBtn');
+    const CHECKIN_OPEN_TIME = new Date('2026-11-24T14:00:00+08:00');
+    const CHECKIN_OPEN_TEXT = '11/24 14:00';
+
+    const regView = document.getElementById('regView');
+    const checkinView = document.getElementById('checkinView');
     const msgEl = document.getElementById('msg');
-    const countdownBox = document.getElementById('countdownBox');
-    const countdownTimer = document.getElementById('countdownTimer');
+
+    const empIdInput = document.getElementById('empId');
+    const empNameInput = document.getElementById('empName');
+    const regBtn = document.getElementById('regBtn');
+    const regCountdownBox = document.getElementById('regCountdownBox');
+    const regCountdownTimer = document.getElementById('regCountdownTimer');
+
+    const savedUserBadge = document.getElementById('savedUserBadge');
+    const badgeEmpId = document.getElementById('badgeEmpId');
+    const badgeEmpName = document.getElementById('badgeEmpName');
+    const checkinEmpIdInput = document.getElementById('checkinEmpId');
+    const checkinBtn = document.getElementById('checkinBtn');
+    const checkinCountdownBox = document.getElementById('checkinCountdownBox');
+    const checkinCountdownTimer = document.getElementById('checkinCountdownTimer');
+    const readerEl = document.getElementById('reader');
+    const cancelScanBtn = document.getElementById('cancelScanBtn');
 
     let isSubmitting = false;
+    let html5QrCode = null;
+    let isScanning = false;
 
-    function updateCountdown() {
-      const diff = OPEN_TIME - new Date();
+    // 格式化倒數文字
+    function formatDiff(diff) {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      const pad = (n) => String(n).padStart(2, '0');
+      return days > 0
+        ? `${days} 天 ${pad(hours)} 時 ${pad(minutes)} 分 ${pad(seconds)} 秒`
+        : `${pad(hours)} 時 ${pad(minutes)} 分 ${pad(seconds)} 秒`;
+    }
 
-      if (diff > 0) {
-        countdownBox.style.display = 'block';
-        inputEl.disabled = true;
-        btnEl.disabled = true;
-        btnEl.innerText = `將於 ${OPEN_TIME_TEXT} 開放`;
+    // 每秒更新兩個階段的倒數計時與按鈕鎖定狀態
+    function updateCountdowns() {
+      const now = new Date();
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-
-        const pad = (n) => String(n).padStart(2, '0');
-        countdownTimer.innerText = days > 0
-          ? `${days} 天 ${pad(hours)} 時 ${pad(minutes)} 分 ${pad(seconds)} 秒`
-          : `${pad(hours)} 時 ${pad(minutes)} 分 ${pad(seconds)} 秒`;
+      // 1. 報名倒數
+      const regDiff = REG_OPEN_TIME - now;
+      if (regDiff > 0) {
+        regCountdownBox.style.display = 'block';
+        regCountdownTimer.innerText = formatDiff(regDiff);
+        empIdInput.disabled = true;
+        empNameInput.disabled = true;
+        regBtn.disabled = true;
+        regBtn.innerText = `將於 ${REG_OPEN_TEXT} 開放報名`;
       } else {
-        countdownBox.style.display = 'none';
-        inputEl.disabled = false;
+        regCountdownBox.style.display = 'none';
+        empIdInput.disabled = false;
+        empNameInput.disabled = false;
         if (!isSubmitting) {
-          btnEl.disabled = false;
-          btnEl.innerText = '確認登記';
+          regBtn.disabled = false;
+          regBtn.innerText = '確認報名';
         }
-        clearInterval(timerInterval);
+      }
+
+      // 2. 報到倒數
+      const checkinDiff = CHECKIN_OPEN_TIME - now;
+      const isAlreadyDone = localStorage.getItem('tw1_checked_in') === 'true' && savedUserBadge.style.display !== 'none';
+      if (isAlreadyDone) {
+        checkinCountdownBox.style.display = 'none';
+        checkinBtn.disabled = true;
+        checkinBtn.innerText = '✅ 已完成現場報到';
+      } else if (checkinDiff > 0) {
+        checkinCountdownBox.style.display = 'block';
+        checkinCountdownTimer.innerText = formatDiff(checkinDiff);
+        checkinBtn.disabled = true;
+        checkinBtn.innerText = `將於 ${CHECKIN_OPEN_TEXT} 開放報到`;
+      } else {
+        checkinCountdownBox.style.display = 'none';
+        if (!isSubmitting && !isScanning) {
+          checkinBtn.disabled = false;
+          checkinBtn.innerText = '📷 我要報到（掃描 QR Code）';
+        }
       }
     }
 
-    const timerInterval = setInterval(updateCountdown, 1000);
-    updateCountdown();
+    setInterval(updateCountdowns, 1000);
 
-    inputEl.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter' && !btnEl.disabled) submitForm();
-    });
+    // 切換到報到畫面
+    function switchToCheckin(useSaved = true) {
+      stopScanner();
+      msgEl.innerText = '';
+      regView.classList.add('hidden');
+      checkinView.classList.remove('hidden');
 
-    async function submitForm() {
-      if (new Date() < OPEN_TIME) {
+      const savedId = localStorage.getItem('tw1_emp_id');
+      const savedName = localStorage.getItem('tw1_emp_name') || '';
+
+      if (useSaved && savedId) {
+        badgeEmpId.innerText = savedId;
+        badgeEmpName.innerText = savedName ? `(${savedName})` : '';
+        savedUserBadge.classList.remove('hidden');
+        checkinEmpIdInput.classList.add('hidden');
+      } else {
+        savedUserBadge.classList.add('hidden');
+        checkinEmpIdInput.classList.remove('hidden');
+        checkinEmpIdInput.value = savedId || '';
+      }
+      updateCountdowns();
+    }
+
+    // 切換回報名畫面
+    function switchToReg() {
+      stopScanner();
+      msgEl.innerText = '';
+      checkinView.classList.add('hidden');
+      regView.classList.remove('hidden');
+      updateCountdowns();
+    }
+
+    // 頁面載入時，若手機已記憶報名資訊，直接顯示報到畫面
+    if (localStorage.getItem('tw1_emp_id')) {
+      switchToCheckin(true);
+    } else {
+      updateCountdowns();
+    }
+
+    // 送出報名
+    async function submitReg() {
+      if (new Date() < REG_OPEN_TIME) {
         msgEl.className = 'err';
-        msgEl.innerText = `尚未開放登記，將於 ${OPEN_TIME_TEXT} 準時開放！`;
+        msgEl.innerText = `尚未開放報名，將於 ${REG_OPEN_TEXT} 準時開放！`;
         return;
       }
 
-      const empId = inputEl.value.trim().toUpperCase();
-      if (!empId) {
+      const empId = empIdInput.value.trim().toUpperCase();
+      const empName = empNameInput.value.trim();
+
+      if (!empId || !empName) {
         msgEl.className = 'err';
-        msgEl.innerText = '請先輸入工號';
+        msgEl.innerText = '請完整輸入工號與姓名';
         return;
       }
 
       isSubmitting = true;
-      btnEl.disabled = true;
-      btnEl.innerText = '報到登記中...';
+      regBtn.disabled = true;
+      regBtn.innerText = '報名資料寫入中...';
       msgEl.innerText = '';
 
       try {
@@ -343,32 +445,153 @@
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ emp_id: empId })
+          body: JSON.stringify({ emp_id: empId, name: empName })
         });
 
         if (response.status === 201) {
+          localStorage.setItem('tw1_emp_id', empId);
+          localStorage.setItem('tw1_emp_name', empName);
+          localStorage.removeItem('tw1_checked_in');
+          switchToCheckin(true);
           msgEl.className = 'ok';
-          msgEl.innerText = `工號 ${empId} 登記成功！祝您中獎！`;
-          inputEl.value = '';
+          msgEl.innerText = `報名成功！活動當天請點擊上方按鈕掃碼報到。`;
         } else if (response.status === 409) {
+          localStorage.setItem('tw1_emp_id', empId);
+          localStorage.setItem('tw1_emp_name', empName);
+          switchToCheckin(true);
           msgEl.className = 'err';
-          msgEl.innerText = `工號 ${empId} 已經登記過了，請勿重複送出！`;
+          msgEl.innerText = `工號 ${empId} 已經報名過了！已為您切換至報到畫面。`;
         } else if (response.status === 403 || response.status === 401) {
           msgEl.className = 'err';
-          msgEl.innerText = `目前尚未開放登記（開放時間：${OPEN_TIME_TEXT}）`;
+          msgEl.innerText = `目前尚未開放報名（開放時間：${REG_OPEN_TEXT}）`;
         } else {
           msgEl.className = 'err';
-          msgEl.innerText = `登記失敗 (錯誤碼 ${response.status})，請稍後再試`;
+          msgEl.innerText = `報名失敗 (錯誤碼 ${response.status})，請稍後再試`;
         }
       } catch (err) {
         msgEl.className = 'err';
         msgEl.innerText = '連線失敗，請檢查網路後再試一次';
       } finally {
         isSubmitting = false;
-        if (new Date() >= OPEN_TIME) {
-          btnEl.disabled = false;
-          btnEl.innerText = '確認登記';
+        updateCountdowns();
+      }
+    }
+
+    // 開啟相機掃描 QR Code
+    async function startScanner() {
+      if (new Date() < CHECKIN_OPEN_TIME) {
+        msgEl.className = 'err';
+        msgEl.innerText = `尚未開放報到，將於 ${CHECKIN_OPEN_TEXT} 準時開放！`;
+        return;
+      }
+
+      const empId = savedUserBadge.classList.contains('hidden')
+        ? checkinEmpIdInput.value.trim().toUpperCase()
+        : localStorage.getItem('tw1_emp_id');
+
+      if (!empId) {
+        msgEl.className = 'err';
+        msgEl.innerText = '請先輸入您已報名的工號';
+        return;
+      }
+
+      if (typeof Html5Qrcode === 'undefined') {
+        msgEl.className = 'err';
+        msgEl.innerText = '掃描模組載入中，請稍等兩秒再試一次';
+        return;
+      }
+
+      msgEl.innerText = '';
+      readerEl.style.display = 'block';
+      cancelScanBtn.classList.remove('hidden');
+      checkinBtn.classList.add('hidden');
+      isScanning = true;
+
+      try {
+        html5QrCode = new Html5Qrcode("reader");
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          (decodedText) => {
+            stopScanner();
+            submitCheckin(empId, decodedText);
+          },
+          () => {}
+        );
+      } catch (err) {
+        stopScanner();
+        msgEl.className = 'err';
+        msgEl.innerText = '無法開啟相機！請允許相機權限，或改用 Chrome / Safari 開啟此網頁。';
+      }
+    }
+
+    // 關閉相機
+    function stopScanner() {
+      isScanning = false;
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
+          html5QrCode = null;
+        }).catch(() => { html5QrCode = null; });
+      }
+      readerEl.style.display = 'none';
+      cancelScanBtn.classList.add('hidden');
+      checkinBtn.classList.remove('hidden');
+      updateCountdowns();
+    }
+
+    // 呼叫後端 RPC 核對 QR Code 並完成報到
+    async function submitCheckin(empId, qrText) {
+      isSubmitting = true;
+      checkinBtn.disabled = true;
+      checkinBtn.innerText = '驗證報到中...';
+      msgEl.innerText = '';
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/do_checkin`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ p_emp_id: empId, p_secret: qrText })
+        });
+
+        if (!response.ok) {
+          msgEl.className = 'err';
+          msgEl.innerText = `報到失敗 (錯誤碼 ${response.status})，請稍後再試`;
+          return;
         }
+
+        const result = await response.json();
+        if (result === 'OK') {
+          localStorage.setItem('tw1_emp_id', empId);
+          localStorage.setItem('tw1_checked_in', 'true');
+          msgEl.className = 'ok';
+          msgEl.innerText = `🎉 工號 ${empId} 報到成功！祝您中大獎！`;
+        } else if (result === 'ALREADY_CHECKED_IN') {
+          localStorage.setItem('tw1_checked_in', 'true');
+          msgEl.className = 'ok';
+          msgEl.innerText = `工號 ${empId} 已經完成報到了，請安心參與抽獎！`;
+        } else if (result === 'NOT_FOUND') {
+          msgEl.className = 'err';
+          msgEl.innerText = `查無工號 ${empId} 的報名紀錄，請先完成報名！`;
+        } else if (result === 'INVALID_QR') {
+          msgEl.className = 'err';
+          msgEl.innerText = '掃描的 QR Code 不正確，請掃描活動現場專屬報到碼！';
+        } else if (result === 'NOT_OPEN') {
+          msgEl.className = 'err';
+          msgEl.innerText = `目前尚未開放報到（開放時間：${CHECKIN_OPEN_TEXT}）`;
+        } else {
+          msgEl.className = 'err';
+          msgEl.innerText = '報到失敗，請稍後再試一次';
+        }
+      } catch (err) {
+        msgEl.className = 'err';
+        msgEl.innerText = '連線失敗，請檢查網路後再試一次';
+      } finally {
+        isSubmitting = false;
+        updateCountdowns();
       }
     }
   </script>
