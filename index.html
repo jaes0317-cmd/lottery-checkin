@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TW1 尾牙活動報名抽獎</title>
-  <!-- 輕量級網頁 QR Code 掃描套件 -->
+  <title>TW1 尾牙活動報名</title>
   <script src="https://unpkg.com/html5-qrcode" defer></script>
   <style>
     body {
@@ -22,7 +21,6 @@
       position: relative;
     }
 
-    /* === 強化版動態神祕煙霧層 === */
     .fog-container {
       position: fixed;
       inset: 0;
@@ -108,7 +106,6 @@
       }
     }
 
-    /* === 主卡片 === */
     .card {
       position: relative;
       z-index: 1;
@@ -245,7 +242,6 @@
       <span class="brand-text">TW1 尾牙活動報名抽獎 (測試)</span>
     </div>
 
-    <!-- ===== 畫面 1：報名表單 ===== -->
     <div id="regView">
       <h2>活動報名登記</h2>
       <div id="regCountdownBox" class="countdown-box">
@@ -258,9 +254,8 @@
       <div class="switch-link" onclick="switchToCheckin()">已經報名過了？點此直接報到 →</div>
     </div>
 
-    <!-- ===== 畫面 2：現場掃碼報到 ===== -->
     <div id="checkinView" class="hidden">
-      <h2>現場掃碼報到</h2>
+      <h2>現場掃碼報到(參加抽獎)</h2>
       <div id="savedUserBadge" class="user-badge hidden">
         已報名工號：<strong id="badgeEmpId"></strong> <span id="badgeEmpName"></span>
       </div>
@@ -287,12 +282,12 @@
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
-    // ★ 請改成與 Supabase SQL 一致的台灣時間
-    const REG_OPEN_TIME = new Date('2026-11-24T14:00:00+08:00');
-    const REG_OPEN_TEXT = '11/24 14:00';
+    // 改成 Supabase SQL 一樣的時間
+    const REG_OPEN_TIME = new Date('2026-11-24T15:00:00+08:00');
+    const REG_OPEN_TEXT = '11/24 15:00';
 
-    const CHECKIN_OPEN_TIME = new Date('2026-11-24T14:00:00+08:00');
-    const CHECKIN_OPEN_TEXT = '11/24 14:00';
+    const CHECKIN_OPEN_TIME = new Date('2026-11-24T15:00:00+08:00');
+    const CHECKIN_OPEN_TEXT = '11/24 15:00';
 
     const regView = document.getElementById('regView');
     const checkinView = document.getElementById('checkinView');
@@ -318,7 +313,6 @@
     let html5QrCode = null;
     let isScanning = false;
 
-    // 格式化倒數文字
     function formatDiff(diff) {
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -330,11 +324,9 @@
         : `${pad(hours)} 時 ${pad(minutes)} 分 ${pad(seconds)} 秒`;
     }
 
-    // 每秒更新兩個階段的倒數計時與按鈕鎖定狀態
     function updateCountdowns() {
       const now = new Date();
 
-      // 1. 報名倒數
       const regDiff = REG_OPEN_TIME - now;
       if (regDiff > 0) {
         regCountdownBox.style.display = 'block';
@@ -353,7 +345,6 @@
         }
       }
 
-      // 2. 報到倒數
       const checkinDiff = CHECKIN_OPEN_TIME - now;
       const isAlreadyDone = localStorage.getItem('tw1_checked_in') === 'true' && savedUserBadge.style.display !== 'none';
       if (isAlreadyDone) {
@@ -408,7 +399,6 @@
       updateCountdowns();
     }
 
-    // 頁面載入時，若手機已記憶報名資訊，直接顯示報到畫面
     if (localStorage.getItem('tw1_emp_id')) {
       switchToCheckin(true);
     } else {
@@ -540,7 +530,7 @@
       updateCountdowns();
     }
 
-    // 呼叫後端 RPC 核對 QR Code 並完成報到
+    // 呼叫後端 RPC 核對 QR Code
     async function submitCheckin(empId, qrText) {
       isSubmitting = true;
       checkinBtn.disabled = true;
