@@ -50,7 +50,25 @@
       line-height: 1.1;
       white-space: nowrap;
     }
-    h2 { margin-top: 0; margin-bottom: 24px; font-size: 24px; }
+    h2 { margin-top: 0; margin-bottom: 16px; font-size: 24px; }
+    #countdownBox {
+      background-color: #2a2417;
+      border: 1px solid #665222;
+      color: #ffd43b;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      line-height: 1.5;
+      display: none;
+    }
+    #countdownTimer {
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-top: 4px;
+    }
     input[type="text"] {
       width: 100%;
       padding: 14px;
@@ -64,6 +82,7 @@
       box-sizing: border-box;
     }
     input[type="text"]:focus { border-color: #0d6efd; outline: none; }
+    input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
     button {
       width: 100%;
       padding: 14px;
@@ -75,7 +94,7 @@
       font-weight: bold;
       cursor: pointer;
     }
-    button:disabled { background-color: #555; cursor: not-allowed; }
+    button:disabled { background-color: #555; color: #aaa; cursor: not-allowed; }
     #msg { margin-top: 20px; font-size: 16px; font-weight: bold; min-height: 24px; }
     .ok { color: #20c997; }
     .err { color: #ff6b6b; }
@@ -89,6 +108,12 @@
     </div>
 
     <h2>報到抽獎登記</h2>
+
+    <div id="countdownBox">
+      距離開放登記還有
+      <span id="countdownTimer">計算中...</span>
+    </div>
+
     <input type="text" id="empId" placeholder="請輸入您的工號" autocomplete="off">
     <button id="submitBtn" onclick="submitForm()">確認登記</button>
     <div id="msg"></div>
@@ -98,25 +123,72 @@
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
-    document.getElementById('empId').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') submitForm();
+    // Supabase SQL 的時間
+    const OPEN_TIME = new Date('2026-11-24T09:45:00+08:00');
+    const OPEN_TIME_TEXT = '11/24 09:45';
+
+    const inputEl = document.getElementById('empId');
+    const btnEl = document.getElementById('submitBtn');
+    const msgEl = document.getElementById('msg');
+    const countdownBox = document.getElementById('countdownBox');
+    const countdownTimer = document.getElementById('countdownTimer');
+
+    let isSubmitting = false;
+
+    function updateCountdown() {
+      const diff = OPEN_TIME - new Date();
+
+      if (diff > 0) {
+        countdownBox.style.display = 'block';
+        inputEl.disabled = true;
+        btnEl.disabled = true;
+        btnEl.innerText = `將於 ${OPEN_TIME_TEXT} 開放`;
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        const pad = (n) => String(n).padStart(2, '0');
+        countdownTimer.innerText = days > 0
+          ? `${days} 天 ${pad(hours)} 時 ${pad(minutes)} 分 ${pad(seconds)} 秒`
+          : `${pad(hours)} 時 ${pad(minutes)} 分 ${pad(seconds)} 秒`;
+      } else {
+        countdownBox.style.display = 'none';
+        inputEl.disabled = false;
+        if (!isSubmitting) {
+          btnEl.disabled = false;
+          btnEl.innerText = '確認登記';
+        }
+        clearInterval(timerInterval);
+      }
+    }
+
+    const timerInterval = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    inputEl.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !btnEl.disabled) submitForm();
     });
 
     async function submitForm() {
-      const input = document.getElementById('empId');
-      const btn = document.getElementById('submitBtn');
-      const msg = document.getElementById('msg');
-      const empId = input.value.trim().toUpperCase();
-
-      if (!empId) {
-        msg.className = 'err';
-        msg.innerText = '請先輸入工號';
+      if (new Date() < OPEN_TIME) {
+        msgEl.className = 'err';
+        msgEl.innerText = `尚未開放登記，將於 ${OPEN_TIME_TEXT} 準時開放！`;
         return;
       }
 
-      btn.disabled = true;
-      btn.innerText = '報到登記中...';
-      msg.innerText = '';
+      const empId = inputEl.value.trim().toUpperCase();
+      if (!empId) {
+        msgEl.className = 'err';
+        msgEl.innerText = '請先輸入工號';
+        return;
+      }
+
+      isSubmitting = true;
+      btnEl.disabled = true;
+      btnEl.innerText = '報到登記中...';
+      msgEl.innerText = '';
 
       try {
         const response = await fetch(`${SUPABASE_URL}/rest/v1/checkins`, {
@@ -130,22 +202,28 @@
         });
 
         if (response.status === 201) {
-          msg.className = 'ok';
-          msg.innerText = `工號 ${empId} 登記成功！祝您中獎！`;
-          input.value = '';
+          msgEl.className = 'ok';
+          msgEl.innerText = `工號 ${empId} 登記成功！祝您中獎！`;
+          inputEl.value = '';
         } else if (response.status === 409) {
-          msg.className = 'err';
-          msg.innerText = `工號 ${empId} 已經登記過了，請勿重複送出！`;
+          msgEl.className = 'err';
+          msgEl.innerText = `工號 ${empId} 已經登記過了，請勿重複送出！`;
+        } else if (response.status === 403 || response.status === 401) {
+          msgEl.className = 'err';
+          msgEl.innerText = `目前尚未開放登記（開放時間：${OPEN_TIME_TEXT}）`;
         } else {
-          msg.className = 'err';
-          msg.innerText = `登記失敗 (錯誤碼 ${response.status})，請稍後再試`;
+          msgEl.className = 'err';
+          msgEl.innerText = `登記失敗 (錯誤碼 ${response.status})，請稍後再試`;
         }
       } catch (err) {
-        msg.className = 'err';
-        msg.innerText = '連線失敗，請檢查網路後再試一次';
+        msgEl.className = 'err';
+        msgEl.innerText = '連線失敗，請檢查網路後再試一次';
       } finally {
-        btn.disabled = false;
-        btn.innerText = '確認登記';
+        isSubmitting = false;
+        if (new Date() >= OPEN_TIME) {
+          btnEl.disabled = false;
+          btnEl.innerText = '確認登記';
+        }
       }
     }
   </script>
