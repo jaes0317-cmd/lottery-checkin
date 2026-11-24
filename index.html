@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TW1 尾牙活動報名</title>
+  <title>TW1 尾牙活動報名抽獎</title>
+
   <script src="https://unpkg.com/html5-qrcode" defer></script>
   <style>
     body {
@@ -203,16 +204,6 @@
       cursor: pointer;
       text-decoration: underline;
     }
-    .user-badge {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 16px;
-      font-size: 15px;
-      color: #e0e0e0;
-    }
-    .user-badge strong { color: #20c997; font-size: 17px; }
 
     #reader {
       width: 100%;
@@ -255,11 +246,8 @@
     </div>
 
     <div id="checkinView" class="hidden">
-      <h2>現場掃碼報到(參加抽獎)</h2>
-      <div id="savedUserBadge" class="user-badge hidden">
-        已報名工號：<strong id="badgeEmpId"></strong> <span id="badgeEmpName"></span>
-      </div>
-      <input type="text" id="checkinEmpId" placeholder="請輸入您已報名的工號" autocomplete="off" class="hidden">
+      <h2>現場掃碼報到</h2>
+      <input type="text" id="checkinEmpId" placeholder="請輸入您已報名的工號" autocomplete="off">
 
       <div id="checkinCountdownBox" class="countdown-box">
         距離開放現場報到還有
@@ -272,7 +260,7 @@
       <div id="reader"></div>
       <button id="cancelScanBtn" class="btn-cancel hidden" onclick="stopScanner()">取消掃描</button>
 
-      <div class="switch-link" onclick="switchToReg()">← 返回報名 / 切換工號</div>
+      <div class="switch-link" onclick="switchToReg()">← 返回活動報名</div>
     </div>
 
     <div id="msg"></div>
@@ -282,12 +270,12 @@
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
-    // 改成 Supabase SQL 一樣的時間
-    const REG_OPEN_TIME = new Date('2026-11-24T17:30:00+08:00');
-    const REG_OPEN_TEXT = '11/24 17:30';
+    // Supabase SQL 08台灣時間
+    const REG_OPEN_TIME = new Date('2026-11-24T20:00:00+08:00');
+    const REG_OPEN_TEXT = '11/24 20:00';
 
-    const CHECKIN_OPEN_TIME = new Date('2026-11-24T17:30:00+08:00');
-    const CHECKIN_OPEN_TEXT = '11/24 17:30';
+    const CHECKIN_OPEN_TIME = new Date('2026-11-24T20:30:00+08:00');
+    const CHECKIN_OPEN_TEXT = '11/24 20:30';
 
     const regView = document.getElementById('regView');
     const checkinView = document.getElementById('checkinView');
@@ -299,9 +287,6 @@
     const regCountdownBox = document.getElementById('regCountdownBox');
     const regCountdownTimer = document.getElementById('regCountdownTimer');
 
-    const savedUserBadge = document.getElementById('savedUserBadge');
-    const badgeEmpId = document.getElementById('badgeEmpId');
-    const badgeEmpName = document.getElementById('badgeEmpName');
     const checkinEmpIdInput = document.getElementById('checkinEmpId');
     const checkinBtn = document.getElementById('checkinBtn');
     const checkinCountdownBox = document.getElementById('checkinCountdownBox');
@@ -327,6 +312,7 @@
     function updateCountdowns() {
       const now = new Date();
 
+      // 1. 報名倒數
       const regDiff = REG_OPEN_TIME - now;
       if (regDiff > 0) {
         regCountdownBox.style.display = 'block';
@@ -345,19 +331,17 @@
         }
       }
 
+      // 2. 報到倒數
       const checkinDiff = CHECKIN_OPEN_TIME - now;
-      const isAlreadyDone = localStorage.getItem('tw1_checked_in') === 'true' && savedUserBadge.style.display !== 'none';
-      if (isAlreadyDone) {
-        checkinCountdownBox.style.display = 'none';
-        checkinBtn.disabled = true;
-        checkinBtn.innerText = '✅ 已完成現場報到';
-      } else if (checkinDiff > 0) {
+      if (checkinDiff > 0) {
         checkinCountdownBox.style.display = 'block';
         checkinCountdownTimer.innerText = formatDiff(checkinDiff);
+        checkinEmpIdInput.disabled = true;
         checkinBtn.disabled = true;
         checkinBtn.innerText = `將於 ${CHECKIN_OPEN_TEXT} 開放報到`;
       } else {
         checkinCountdownBox.style.display = 'none';
+        checkinEmpIdInput.disabled = false;
         if (!isSubmitting && !isScanning) {
           checkinBtn.disabled = false;
           checkinBtn.innerText = '📷 我要報到（掃描 QR Code）';
@@ -366,31 +350,19 @@
     }
 
     setInterval(updateCountdowns, 1000);
+    updateCountdowns();
 
-    // 切換到報到畫面
-    function switchToCheckin(useSaved = true) {
+    function switchToCheckin(prefillEmpId = '') {
       stopScanner();
       msgEl.innerText = '';
       regView.classList.add('hidden');
       checkinView.classList.remove('hidden');
-
-      const savedId = localStorage.getItem('tw1_emp_id');
-      const savedName = localStorage.getItem('tw1_emp_name') || '';
-
-      if (useSaved && savedId) {
-        badgeEmpId.innerText = savedId;
-        badgeEmpName.innerText = savedName ? `(${savedName})` : '';
-        savedUserBadge.classList.remove('hidden');
-        checkinEmpIdInput.classList.add('hidden');
-      } else {
-        savedUserBadge.classList.add('hidden');
-        checkinEmpIdInput.classList.remove('hidden');
-        checkinEmpIdInput.value = savedId || '';
+      if (prefillEmpId) {
+        checkinEmpIdInput.value = prefillEmpId;
       }
       updateCountdowns();
     }
 
-    // 切換回報名畫面
     function switchToReg() {
       stopScanner();
       msgEl.innerText = '';
@@ -399,13 +371,6 @@
       updateCountdowns();
     }
 
-    if (localStorage.getItem('tw1_emp_id')) {
-      switchToCheckin(true);
-    } else {
-      updateCountdowns();
-    }
-
-    // 送出報名
     async function submitReg() {
       if (new Date() < REG_OPEN_TIME) {
         msgEl.className = 'err';
@@ -424,7 +389,7 @@
 
       isSubmitting = true;
       regBtn.disabled = true;
-      regBtn.innerText = '登記報名中...';
+      regBtn.innerText = '登記報名資料中...';
       msgEl.innerText = '';
 
       try {
@@ -439,16 +404,13 @@
         });
 
         if (response.status === 201) {
-          localStorage.setItem('tw1_emp_id', empId);
-          localStorage.setItem('tw1_emp_name', empName);
-          localStorage.removeItem('tw1_checked_in');
-          switchToCheckin(true);
+          empIdInput.value = '';
+          empNameInput.value = '';
+          switchToCheckin(empId);
           msgEl.className = 'ok';
-          msgEl.innerText = `報名成功！活動當天請點擊上方按鈕掃碼報到。`;
+          msgEl.innerText = `工號 ${empId} 報名成功！活動當天請點擊上方按鈕掃碼報到。`;
         } else if (response.status === 409) {
-          localStorage.setItem('tw1_emp_id', empId);
-          localStorage.setItem('tw1_emp_name', empName);
-          switchToCheckin(true);
+          switchToCheckin(empId);
           msgEl.className = 'err';
           msgEl.innerText = `工號 ${empId} 已經報名過了！已為您切換至報到畫面。`;
         } else if (response.status === 403 || response.status === 401) {
@@ -475,10 +437,7 @@
         return;
       }
 
-      const empId = savedUserBadge.classList.contains('hidden')
-        ? checkinEmpIdInput.value.trim().toUpperCase()
-        : localStorage.getItem('tw1_emp_id');
-
+      const empId = checkinEmpIdInput.value.trim().toUpperCase();
       if (!empId) {
         msgEl.className = 'err';
         msgEl.innerText = '請先輸入您已報名的工號';
@@ -555,12 +514,9 @@
 
         const result = await response.json();
         if (result === 'OK') {
-          localStorage.setItem('tw1_emp_id', empId);
-          localStorage.setItem('tw1_checked_in', 'true');
           msgEl.className = 'ok';
           msgEl.innerText = `🎉 工號 ${empId} 報到成功！祝您中大獎！`;
         } else if (result === 'ALREADY_CHECKED_IN') {
-          localStorage.setItem('tw1_checked_in', 'true');
           msgEl.className = 'ok';
           msgEl.innerText = `工號 ${empId} 已經完成報到了，請安心參與抽獎！`;
         } else if (result === 'NOT_FOUND') {
