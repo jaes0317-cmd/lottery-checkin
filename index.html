@@ -20,7 +20,6 @@
       position: relative;
     }
 
-    /* === 強化版動態神祕煙霧層 === */
     .fog-container {
       position: fixed;
       inset: 0;
@@ -33,10 +32,9 @@
       position: absolute;
       filter: blur(48px);
       will-change: transform, opacity;
-      mix-blend-mode: screen; /* 讓煙霧重疊時產生自然發光層次 */
+      mix-blend-mode: screen;
     }
 
-    /* 煙霧 1：台達科技藍（不規則形狀，大範圍順時針翻湧） */
     .fog-1 {
       width: 460px;
       height: 300px;
@@ -49,7 +47,6 @@
       animation: swirl1 7s ease-in-out infinite alternate;
     }
 
-    /* 煙霧 2：神祕靛紫（逆時針繞著卡片右下與左上流動） */
     .fog-2 {
       width: 500px;
       height: 320px;
@@ -62,7 +59,6 @@
       animation: swirl2 8.5s ease-in-out infinite alternate;
     }
 
-    /* 煙霧 3：冷冽青霧（快速橫向飄移掃過背景） */
     .fog-3 {
       width: 560px;
       height: 220px;
@@ -93,7 +89,6 @@
       100% { transform: translate3d(160px, 30px, 0) rotate(25deg) scaleX(0.95);  opacity: 0.4; }
     }
 
-    /* === 主卡片（毛玻璃微光質感） === */
     .card {
       position: relative;
       z-index: 1;
@@ -192,7 +187,7 @@
   </style>
 </head>
 <body>
-  <!-- 強化版動態神祕煙霧層 -->
+
   <div class="fog-container">
     <div class="fog-blob fog-1"></div>
     <div class="fog-blob fog-2"></div>
@@ -221,9 +216,9 @@
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
-    // ★ 設定開放時間（請與 Supabase SQL 設定一致）
-    const OPEN_TIME = new Date('2026-12-20T17:00:00+08:00');
-    const OPEN_TIME_TEXT = '12/20 17:00';
+    // 開放時間（Supabase SQL 時間）
+    const OPEN_TIME = new Date('2026-11-24T12:00:00+08:00');
+    const OPEN_TIME_TEXT = '11/24 12:00';
 
     const inputEl = document.getElementById('empId');
     const btnEl = document.getElementById('submitBtn');
