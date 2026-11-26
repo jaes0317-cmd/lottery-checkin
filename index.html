@@ -126,10 +126,11 @@
       }
     }
 
-    /* === 主卡片（加上頂部玻璃高光邊緣） === */
+/* === 主卡片（玻璃高光邊緣 + 0.6s 進場與流光） === */
     .card {
       position: relative;
       z-index: 1;
+      overflow: hidden;
       background: rgba(20, 22, 28, 0.76);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
@@ -143,6 +144,45 @@
       width: 100%;
       max-width: 360px;
       text-align: center;
+      animation: cardEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        115deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.16) 48%,
+        rgba(0, 225, 255, 0.14) 52%,
+        transparent 75%
+      );
+      transform: translateX(-130%);
+      animation: glassSweep 0.65s ease-out 0.12s forwards;
+    }
+    @keyframes cardEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    @keyframes glassSweep {
+      0% {
+        transform: translateX(-130%);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(130%);
+        opacity: 0;
+      }
     }
     .brand-header {
       display: flex;
