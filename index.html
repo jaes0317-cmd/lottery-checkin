@@ -331,15 +331,14 @@
       <button id="regBtn" class="action-btn" onclick="submitReg()">確認報名</button>
     </div>
 
-    <!-- ===== 畫面 2：現場掃碼報到 ===== -->
+<!-- ===== 畫面 2：現場掃碼報到 ===== -->
     <div id="checkinView" class="hidden">
       <h2>現場掃碼報到 (參加抽獎)</h2>
-      <input type="text" id="checkinEmpId" inputmode="numeric" placeholder="請輸入您已報名的工號" autocomplete="off">
-
       <div id="checkinCountdownBox" class="countdown-box">
         距離開放現場報到還有
         <span id="checkinCountdownTimer" class="countdown-timer">計算中...</span>
       </div>
+      <input type="text" id="checkinEmpId" inputmode="numeric" placeholder="請輸入您已報名的工號" autocomplete="off">
 
       <button id="checkinBtn" class="action-btn btn-green" onclick="startScanner()">📷 我要報到（掃描 QR Code）</button>
 
