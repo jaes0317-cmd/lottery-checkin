@@ -7,7 +7,7 @@
 
   <!-- LINE / Teams 連結預覽資訊 -->
   <meta property="og:title" content="TW1 尾牙活動報名與現場報到">
-  <meta property="og:description" content="請輸入工號與姓名完成活動報名，活動當天現場掃描 QR Code 報到即可參加抽獎！">
+  <meta property="og:description" content="完成活動報名，當天現場掃描 QR Code 報到即可參加抽獎！">
   <meta property="og:type" content="website">
 
 <!-- 瀏覽器分頁小圖示 (Favicon) -->
@@ -367,7 +367,7 @@
         <span id="regCountdownTimer" class="countdown-timer">計算中...</span>
       </div>
       <input type="text" id="empId" inputmode="numeric" placeholder="請輸入您的工號" autocomplete="off">
-<input type="text" id="empName" placeholder="姓名自動帶出" autocomplete="off" readonly>
+<input type="text" id="empName" placeholder="姓名自動帶入" autocomplete="off" readonly>
       <button id="regBtn" class="action-btn" onclick="submitReg()">確認報名</button>
     </div>
 
@@ -436,7 +436,7 @@
 
 if (empId.length < 4) {
         empNameInput.value = '';
-        empNameInput.placeholder = '輸入工號後自動帶出姓名';
+        empNameInput.placeholder = '姓名自動帶入';
         msgEl.innerText = '';
         return;
       }
@@ -595,7 +595,7 @@ async function submitReg() {
         if (result === 'OK') {
           empIdInput.value = '';
           empNameInput.value = '';
-          empNameInput.placeholder = '輸入工號後自動帶出姓名';
+          empNameInput.placeholder = '姓名自動帶入';
           switchToCheckin(empId);
           msgEl.className = 'ok';
           msgEl.innerText = `工號 ${empId} 報名成功！\n活動當天請點擊上方按鈕掃碼報到。`;
