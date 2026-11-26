@@ -214,7 +214,15 @@
       border: 2px solid #0d6efd;
     }
 
-    #msg { margin-top: 18px; font-size: 16px; font-weight: bold; min-height: 24px; line-height: 1.4; }
+#msg {
+      margin-top: 18px;
+      font-size: clamp(13.5px, 3.8vw, 16px);
+      font-weight: bold;
+      min-height: 24px;
+      line-height: 1.6;
+      white-space: pre-line;
+      text-wrap: balance;
+    }
     .ok { color: #20c997; }
     .err { color: #ff6b6b; }
     .hidden { display: none; }
@@ -388,10 +396,10 @@
       updateCountdowns();
     }
 
-    async function submitReg() {
+async function submitReg() {
       if (new Date() < REG_OPEN_TIME) {
         msgEl.className = 'err';
-        msgEl.innerText = `尚未開放報名，將於 ${REG_OPEN_TEXT} 準時開放！`;
+        msgEl.innerText = `尚未開放報名，\n將於 ${REG_OPEN_TEXT} 準時開放！`;
         return;
       }
 
@@ -425,32 +433,31 @@
           empNameInput.value = '';
           switchToCheckin(empId);
           msgEl.className = 'ok';
-          msgEl.innerText = `工號 ${empId} 報名成功！活動當天請點擊上方按鈕掃碼報到。`;
+          msgEl.innerText = `工號 ${empId} 報名成功！\n活動當天請點擊上方按鈕掃碼報到。`;
         } else if (response.status === 409) {
           switchToCheckin(empId);
           msgEl.className = 'err';
-          msgEl.innerText = `工號 ${empId} 已經報名過了！已為您切換至報到畫面。`;
+          msgEl.innerText = `工號 ${empId} 已經報名過了！\n已為您切換至報到畫面。`;
         } else if (response.status === 403 || response.status === 401) {
           msgEl.className = 'err';
-          msgEl.innerText = `目前尚未開放報名（開放時間：${REG_OPEN_TEXT}）`;
+          msgEl.innerText = `目前尚未開放報名\n（開放時間：${REG_OPEN_TEXT}）`;
         } else {
           msgEl.className = 'err';
-          msgEl.innerText = `報名失敗 (錯誤碼 ${response.status})，請稍後再試`;
+          msgEl.innerText = `報名失敗 (錯誤碼 ${response.status})，\n請稍後再試`;
         }
       } catch (err) {
         msgEl.className = 'err';
-        msgEl.innerText = '連線失敗，請檢查網路後再試一次';
+        msgEl.innerText = '連線失敗，\n請檢查網路後再試一次';
       } finally {
         isSubmitting = false;
         updateCountdowns();
       }
     }
-
-    // 開啟相機掃描 QR Code
+// 開啟相機掃描 QR Code
     async function startScanner() {
       if (new Date() < CHECKIN_OPEN_TIME) {
         msgEl.className = 'err';
-        msgEl.innerText = `尚未開放報到，將於 ${CHECKIN_OPEN_TEXT} 準時開放！`;
+        msgEl.innerText = `尚未開放報到，\n將於 ${CHECKIN_OPEN_TEXT} 準時開放！`;
         return;
       }
 
@@ -463,7 +470,7 @@
 
       if (typeof Html5Qrcode === 'undefined') {
         msgEl.className = 'err';
-        msgEl.innerText = '掃描模組載入中，請稍等兩秒再試一次';
+        msgEl.innerText = '掃描模組載入中，\n請稍等兩秒再試一次';
         return;
       }
 
@@ -487,10 +494,9 @@
       } catch (err) {
         stopScanner();
         msgEl.className = 'err';
-        msgEl.innerText = '無法開啟相機！請允許相機權限，或改用 Chrome / Safari 開啟此網頁。';
+        msgEl.innerText = '無法開啟相機！\n請允許相機權限，\n或改用 Chrome / Safari 開啟此網頁。';
       }
     }
-
     // 關閉相機
     function stopScanner() {
       isScanning = false;
@@ -506,7 +512,7 @@
       updateCountdowns();
     }
 
-    // 呼叫後端 RPC 核對 QR Code
+// 呼叫後端 RPC 核對 QR Code
     async function submitCheckin(empId, qrText) {
       isSubmitting = true;
       checkinBtn.disabled = true;
@@ -525,33 +531,33 @@
 
         if (!response.ok) {
           msgEl.className = 'err';
-          msgEl.innerText = `報到失敗 (錯誤碼 ${response.status})，請稍後再試`;
+          msgEl.innerText = `報到失敗 (錯誤碼 ${response.status})，\n請稍後再試`;
           return;
         }
 
         const result = await response.json();
         if (result === 'OK') {
           msgEl.className = 'ok';
-          msgEl.innerText = `🎉 工號 ${empId} 報到成功！祝您中大獎！`;
+          msgEl.innerText = `🎉 工號 ${empId} 報到成功！\n祝您中大獎！`;
         } else if (result === 'ALREADY_CHECKED_IN') {
           msgEl.className = 'ok';
-          msgEl.innerText = `工號 ${empId} 已經完成報到了，請安心參與抽獎！`;
+          msgEl.innerText = `工號 ${empId} 已經完成報到了，\n請安心參與抽獎！`;
         } else if (result === 'NOT_FOUND') {
           msgEl.className = 'err';
-          msgEl.innerText = `查無工號 ${empId} 的報名紀錄，請先完成報名！`;
+          msgEl.innerText = `查無工號 ${empId} 的報名紀錄，\n請先完成報名！`;
         } else if (result === 'INVALID_QR') {
           msgEl.className = 'err';
-          msgEl.innerText = '掃描的 QR Code 不正確，請掃描活動現場專屬報到碼！';
+          msgEl.innerText = '掃描的 QR Code 不正確，\n請掃描活動現場專屬報到碼！';
         } else if (result === 'NOT_OPEN') {
           msgEl.className = 'err';
-          msgEl.innerText = `目前尚未開放報到（開放時間：${CHECKIN_OPEN_TEXT}）`;
+          msgEl.innerText = `目前尚未開放報到\n（開放時間：${CHECKIN_OPEN_TEXT}）`;
         } else {
           msgEl.className = 'err';
           msgEl.innerText = '報到失敗，請稍後再試一次';
         }
       } catch (err) {
         msgEl.className = 'err';
-        msgEl.innerText = '連線失敗，請檢查網路後再試一次';
+        msgEl.innerText = '連線失敗，\n請檢查網路後再試一次';
       } finally {
         isSubmitting = false;
         updateCountdowns();
