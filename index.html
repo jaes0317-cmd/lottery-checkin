@@ -442,7 +442,7 @@ if (empId.length < 4) {
       }
 
       lookupTimer = setTimeout(async () => {
-        empNameInput.placeholder = '查詢名單中...';
+        empNameInput.placeholder = '比對名單中...';
         msgEl.innerText = '';
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_emp_name`, {
