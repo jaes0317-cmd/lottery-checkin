@@ -367,7 +367,7 @@
         <span id="regCountdownTimer" class="countdown-timer">計算中...</span>
       </div>
       <input type="text" id="empId" inputmode="numeric" placeholder="請輸入您的工號" autocomplete="off">
-      <input type="text" id="empName" placeholder="請輸入您的姓名" autocomplete="off">
+<input type="text" id="empName" placeholder="輸入工號後自動帶出姓名" autocomplete="off" readonly>
       <button id="regBtn" class="action-btn" onclick="submitReg()">確認報名</button>
     </div>
 
@@ -427,6 +427,48 @@
     let isSubmitting = false;
     let html5QrCode = null;
     let isScanning = false;
+
+// 輸入工號自動帶出姓名（停頓 400ms 後查詢，減少無效請求）
+    let lookupTimer = null;
+    empIdInput.addEventListener('input', () => {
+      clearTimeout(lookupTimer);
+      const empId = empIdInput.value.trim().toUpperCase();
+
+if (empId.length < 4) {
+        empNameInput.value = '';
+        empNameInput.placeholder = '輸入工號後自動帶出姓名';
+        msgEl.innerText = '';
+        return;
+      }
+
+      lookupTimer = setTimeout(async () => {
+        empNameInput.placeholder = '查詢名單中...';
+        msgEl.innerText = '';
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_emp_name`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_PUBLISHABLE_KEY,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ p_emp_id: empId })
+          });
+          if (res.ok) {
+            const name = await res.json();
+            if (name) {
+              empNameInput.value = name;
+            } else {
+              empNameInput.value = '';
+              empNameInput.placeholder = '查無此工號';
+              msgEl.className = 'err';
+              msgEl.innerText = '查無此工號，不符合報名資格！\n如有疑問請聯繫系統服務窗口。';
+            }
+          }
+        } catch (err) {
+          empNameInput.placeholder = '查詢失敗，請重試';
+        }
+      }, 400);
+    });
 
     // 鍵盤 Enter 捷徑
     empIdInput.addEventListener('keydown', (e) => {
@@ -514,7 +556,7 @@
       updateCountdowns();
     }
 
-    async function submitReg() {
+async function submitReg() {
       if (new Date() < REG_OPEN_TIME) {
         msgEl.className = 'err';
         msgEl.innerText = `尚未開放報名，\n將於 ${REG_OPEN_TEXT} 準時開放！`;
@@ -522,46 +564,54 @@
       }
 
       const empId = empIdInput.value.trim().toUpperCase();
-      const empName = empNameInput.value.trim();
-
-      if (!empId || !empName) {
+      if (!empId) {
         msgEl.className = 'err';
-        msgEl.innerText = '請完整輸入工號與姓名';
+        msgEl.innerText = '請輸入您的工號';
         return;
       }
 
       isSubmitting = true;
       regBtn.disabled = true;
-      regBtn.innerText = '登記報名資料中...';
+      regBtn.innerText = '驗證資格並報名中...';
       msgEl.innerText = '';
 
       try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/checkins`, {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/do_register`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_PUBLISHABLE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ emp_id: empId, name: empName })
+          body: JSON.stringify({ p_emp_id: empId })
         });
 
-        if (response.status === 201) {
+        if (!response.ok) {
+          msgEl.className = 'err';
+          msgEl.innerText = `報名失敗 (錯誤碼 ${response.status})，\n請稍後再試`;
+          return;
+        }
+
+        const result = await response.json();
+        if (result === 'OK') {
           empIdInput.value = '';
           empNameInput.value = '';
+          empNameInput.placeholder = '輸入工號後自動帶出姓名';
           switchToCheckin(empId);
           msgEl.className = 'ok';
           msgEl.innerText = `工號 ${empId} 報名成功！\n活動當天請點擊上方按鈕掃碼報到。`;
-        } else if (response.status === 409) {
+        } else if (result === 'ALREADY_REGISTERED') {
           switchToCheckin(empId);
           msgEl.className = 'err';
           msgEl.innerText = `工號 ${empId} 已經報名過了！\n已為您切換至報到畫面。`;
-        } else if (response.status === 403 || response.status === 401) {
+        } else if (result === 'NOT_ELIGIBLE') {
+          msgEl.className = 'err';
+          msgEl.innerText = `工號 ${empId} 不在名單內，不符合報名資格！\n如有疑問請聯繫系統服務窗口。`;
+        } else if (result === 'NOT_OPEN') {
           msgEl.className = 'err';
           msgEl.innerText = `目前尚未開放報名\n（開放時間：${REG_OPEN_TEXT}）`;
         } else {
           msgEl.className = 'err';
-          msgEl.innerText = `報名失敗 (錯誤碼 ${response.status})，\n請稍後再試`;
+          msgEl.innerText = '報名失敗，請稍後再試一次';
         }
       } catch (err) {
         msgEl.className = 'err';
@@ -571,7 +621,6 @@
         updateCountdowns();
       }
     }
-
     async function startScanner() {
       if (new Date() < CHECKIN_OPEN_TIME) {
         msgEl.className = 'err';
