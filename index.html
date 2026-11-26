@@ -459,13 +459,13 @@ if (empId.length < 4) {
               empNameInput.value = name;
             } else {
               empNameInput.value = '';
-              empNameInput.placeholder = '查無此工號';
+              empNameInput.placeholder = 'TW1名單不存在';
               msgEl.className = 'err';
-              msgEl.innerText = '查無此工號，不符合報名資格！\n如有疑問請聯繫系統服務窗口。';
+              msgEl.innerText = '不符合報名資格！\n如有疑問請聯繫主辦窗口。';
             }
           }
         } catch (err) {
-          empNameInput.placeholder = '查詢失敗，請重試';
+          empNameInput.placeholder = '比對失敗，請重試';
         }
       }, 400);
     });
@@ -572,7 +572,7 @@ async function submitReg() {
 
       isSubmitting = true;
       regBtn.disabled = true;
-      regBtn.innerText = '驗證資格並報名中...';
+      regBtn.innerText = '驗證資格並報名...';
       msgEl.innerText = '';
 
       try {
@@ -711,7 +711,7 @@ async function submitReg() {
           msgEl.innerText = `工號 ${empId} 已經完成報到了，\n請安心參與抽獎！`;
         } else if (result === 'NOT_FOUND') {
           msgEl.className = 'err';
-          msgEl.innerText = `查無工號 ${empId} 的報名紀錄，\n請先完成報名！`;
+          msgEl.innerText = `沒有工號 ${empId} 的報名紀錄，\n請先完成報名！`;
         } else if (result === 'INVALID_QR') {
           msgEl.className = 'err';
           msgEl.innerText = '掃描的 QR Code 不正確，\n請掃描活動現場專屬報到碼！';
