@@ -788,11 +788,14 @@ if (res.ok) {
               msgEl.className = 'err';
               msgEl.innerText = '不符合報名資格！\n如有疑問請聯繫主辦窗口。';
             }
+          } else if (res.status === 429 || res.status >= 500) {
+            empNameInput.className = 'name-display not-found';
+            empNameInput.innerText = '⏳ 人數眾多，請稍候再試';
           }
         } catch (err) {
           if (err.name === 'AbortError') return;
           empNameInput.className = 'name-display not-found';
-          empNameInput.innerText = '比對失敗，請重試';
+          empNameInput.innerText = '⏳ 連線忙碌，請稍候再試';
         }
       }, 400);
     });
@@ -959,9 +962,11 @@ if (result === 'OK') {
           msgEl.className = 'err';
           msgEl.innerText = '報名失敗，請稍後再試一次';
         }
-      } catch (err) {
+} catch (err) {
         msgEl.className = 'err';
-        msgEl.innerText = '連線失敗，\n請檢查網路後再試一次';
+        msgEl.innerText = err.name === 'AbortError'
+          ? '目前操作人數眾多，回應較慢，\n請稍等幾秒後再試一次！'
+          : '連線忙碌或網路不穩，\n請稍候再試一次！';
       } finally {
         isSubmitting = false;
         updateCountdowns();
@@ -1034,14 +1039,25 @@ readerEl.style.display = 'none';
       msgEl.innerText = '';
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/do_checkin`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_PUBLISHABLE_KEY,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ p_emp_id: empId, p_secret: qrText })
+          body: JSON.stringify({ p_emp_id: empId, p_secret: qrText }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
+        if (response.status === 429 || response.status >= 500) {
+          msgEl.className = 'err';
+          msgEl.innerText = '目前報到人數眾多，系統較忙碌，\n請稍等幾秒後再掃一次！';
+          return;
+        }
 
         if (!response.ok) {
           msgEl.className = 'err';
