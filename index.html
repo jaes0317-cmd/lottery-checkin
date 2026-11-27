@@ -356,6 +356,27 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
     }
     .hidden { display: none !important; }
 
+.venue-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      color: #d0d4dc;
+      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .venue-link:hover {
+      background: rgba(0, 225, 255, 0.14);
+      border-color: rgba(0, 225, 255, 0.45);
+      color: #ffffff;
+    }
+
     .contact-footer {
       margin-top: 12px;
       padding-top: 14px;
@@ -487,7 +508,11 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       <button id="cancelScanBtn" class="action-btn btn-cancel hidden" onclick="stopScanner()">取消掃描</button>
     </div>
 
-    <div id="msg"></div>
+<div id="msg"></div>
+
+    <a class="venue-link" href="https://share.google/CjpMZVXqsfMROxduE" target="_blank" rel="noopener noreferrer">
+      📍 教父牛排 Danny's Steak House（點擊開啟導航）
+    </a>
 
     <div class="contact-footer">
       系統聯繫窗口：<a href="mailto:james.zc.hsu@deltaww.com">james.zc.hsu@deltaww.com</a>
