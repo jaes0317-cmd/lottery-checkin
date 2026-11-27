@@ -411,6 +411,16 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
         opacity: 0;
       }
     }
+.reg-notice {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: rgba(255, 193, 7, 0.08);
+      border: 1px solid rgba(255, 193, 7, 0.25);
+      border-radius: 8px;
+      font-size: 12.5px;
+      color: #ffd43b;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -443,7 +453,10 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       </div>
 <input type="text" id="empId" inputmode="numeric" placeholder="請輸入您的工號" autocomplete="off">
       <div id="empName" class="name-display">姓名自動帶入</div>
-      <button id="regBtn" class="action-btn" onclick="submitReg()">確認報名</button>
+<button id="regBtn" class="action-btn" onclick="submitReg()">確認報名</button>
+<div class="reg-notice">
+        ⚠️ 提醒：未經本人同意請勿擅自代為報名，<br>以免影響活動人數統計。
+      </div>
     </div>
 
 <!-- ===== 畫面 2：現場掃碼報到 ===== -->
@@ -473,9 +486,12 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
-    // ★ 請改成與 Supabase SQL 一致的台灣時間 (+08)
+// ★ 請改成與 Supabase SQL 一致的台灣時間 (+08)
     const REG_OPEN_TIME = new Date('2026-11-26T23:45:00+08:00');
     const REG_OPEN_TEXT = '11/26 23:45';
+
+    const REG_CLOSE_TIME = new Date('2026-12-26T23:59:59+08:00');
+    const REG_CLOSE_TEXT = '12/26 23:59';
 
     const CHECKIN_OPEN_TIME = new Date('2026-11-27T00:10:00+08:00');
     const CHECKIN_OPEN_TEXT = '11/27 00:10';
@@ -583,18 +599,21 @@ if (empId.length < 4) {
     function updateCountdowns() {
       const now = new Date();
 
-      const regDiff = REG_OPEN_TIME - now;
+const regDiff = REG_OPEN_TIME - now;
       if (regDiff > 0) {
         regCountdownBox.style.display = 'block';
         regCountdownTimer.innerText = formatDiff(regDiff);
         empIdInput.disabled = true;
-        empNameInput.disabled = true;
         regBtn.disabled = true;
         regBtn.innerText = `將於 ${REG_OPEN_TEXT} 開放報名`;
+      } else if (now > REG_CLOSE_TIME) {
+        regCountdownBox.style.display = 'none';
+        empIdInput.disabled = true;
+        regBtn.disabled = true;
+        regBtn.innerText = `報名已截止（${REG_CLOSE_TEXT}）`;
       } else {
         regCountdownBox.style.display = 'none';
         empIdInput.disabled = false;
-        empNameInput.disabled = false;
         if (!isSubmitting) {
           regBtn.disabled = false;
           regBtn.innerText = '確認報名';
@@ -645,9 +664,14 @@ if (empId.length < 4) {
     }
 
 async function submitReg() {
-      if (new Date() < REG_OPEN_TIME) {
+if (new Date() < REG_OPEN_TIME) {
         msgEl.className = 'err';
         msgEl.innerText = `尚未開放報名，\n將於 ${REG_OPEN_TEXT} 準時開放！`;
+        return;
+      }
+      if (new Date() > REG_CLOSE_TIME) {
+        msgEl.className = 'err';
+        msgEl.innerText = `活動報名已於 ${REG_CLOSE_TEXT} 截止！\n如有疑問請聯繫主辦窗口。`;
         return;
       }
 
@@ -694,10 +718,13 @@ if (result === 'OK') {
           msgEl.innerText = `工號 ${empId} 已經報名過了！\n已為您切換至報到畫面。`;
         } else if (result === 'NOT_ELIGIBLE') {
           msgEl.className = 'err';
-          msgEl.innerText = `工號 ${empId} 不在名單內，不符合報名資格！\n如有疑問請聯繫系統服務窗口。`;
-        } else if (result === 'NOT_OPEN') {
+          msgEl.innerText = `工號 ${empId} 不在名單內，不符合報名資格！\n如有疑問請聯繫主辦窗口。`;
+} else if (result === 'NOT_OPEN') {
           msgEl.className = 'err';
           msgEl.innerText = `目前尚未開放報名\n（開放時間：${REG_OPEN_TEXT}）`;
+        } else if (result === 'CLOSED') {
+          msgEl.className = 'err';
+          msgEl.innerText = `活動報名已於 ${REG_CLOSE_TEXT} 截止！\n如有疑問請聯繫主辦窗口。`;
         } else {
           msgEl.className = 'err';
           msgEl.innerText = '報名失敗，請稍後再試一次';
