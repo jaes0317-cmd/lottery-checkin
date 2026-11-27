@@ -604,10 +604,8 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
 .emoji-fix {
       display: inline-block;
     }
-    @media (min-width: 769px) {
-      .emoji-fix {
-        transform: translateY(-2px);
-      }
+    .is-win .emoji-fix {
+      transform: translateY(-2px);
     }
   </style>
 </head>
@@ -703,7 +701,11 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
     </div>
   </div>
 
-  <script>
+<script>
+    if (/Windows/i.test(navigator.userAgent)) {
+      document.documentElement.classList.add('is-win');
+    }
+
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
