@@ -729,7 +729,7 @@ if (empId.length < 4) {
 
           if (empIdInput.value.trim().toUpperCase() !== empId) return;
 
-          if (res.ok) {
+if (res.ok) {
             const name = await res.json();
             if (name) {
               empNameInput.className = 'name-display found';
@@ -859,14 +859,25 @@ if (new Date() < REG_OPEN_TIME) {
       msgEl.innerText = '';
 
       try {
+const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/do_register`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_PUBLISHABLE_KEY,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ p_emp_id: empId })
+          body: JSON.stringify({ p_emp_id: empId }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
+        if (response.status === 429 || response.status >= 500) {
+          msgEl.className = 'err';
+          msgEl.innerText = '目前操作人數眾多，系統較忙碌，\n請稍等後再試一次！';
+          return;
+        }
 
         if (!response.ok) {
           msgEl.className = 'err';
@@ -1011,9 +1022,11 @@ readerEl.style.display = 'none';
           msgEl.className = 'err';
           msgEl.innerText = '報到失敗，請稍後再試一次';
         }
-      } catch (err) {
+} catch (err) {
         msgEl.className = 'err';
-        msgEl.innerText = '連線失敗，\n請檢查網路後再試一次';
+        msgEl.innerText = err.name === 'AbortError'
+          ? '目前操作人數眾多，回應較慢，\n請稍等幾秒後再試一次！'
+          : '連線忙碌或網路不穩，\n請稍候再試一次！';
       } finally {
         isSubmitting = false;
         updateCountdowns();
