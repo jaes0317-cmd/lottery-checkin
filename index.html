@@ -411,7 +411,15 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
         opacity: 0;
       }
     }
-.reg-notice {
+/* 開啟相機掃碼或系統開啟減少動態時，暫停背景煙霧以節省 GPU */
+    body.scanning .fog-blob {
+      animation-play-state: paused;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fog-blob { animation: none; }
+    }
+
+    .reg-notice {
       margin-top: 12px;
       padding: 8px 12px;
       background: rgba(255, 193, 7, 0.08);
@@ -758,9 +766,10 @@ if (result === 'OK') {
       }
 
       msgEl.innerText = '';
-      readerEl.style.display = 'block';
+readerEl.style.display = 'block';
       cancelScanBtn.classList.remove('hidden');
       checkinBtn.classList.add('hidden');
+      document.body.classList.add('scanning');
       isScanning = true;
 
       try {
@@ -789,9 +798,10 @@ if (result === 'OK') {
           html5QrCode = null;
         }).catch(() => { html5QrCode = null; });
       }
-      readerEl.style.display = 'none';
+readerEl.style.display = 'none';
       cancelScanBtn.classList.add('hidden');
       checkinBtn.classList.remove('hidden');
+      document.body.classList.remove('scanning');
       updateCountdowns();
     }
 
