@@ -266,7 +266,32 @@
       box-shadow: 0 0 12px rgba(13, 110, 253, 0.35);
       outline: none;
     }
-    input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
+input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .name-display {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      background-color: rgba(255, 255, 255, 0.04);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      font-size: 15px;
+      color: #8892a0;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+    .name-display.found {
+      background-color: rgba(32, 201, 151, 0.12);
+      border: 1px solid rgba(32, 201, 151, 0.45);
+      color: #20c997;
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .name-display.not-found {
+      background-color: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.4);
+      color: #ff6b6b;
+    }
 
     .action-btn {
       width: 100%;
@@ -416,8 +441,8 @@
         距離開放報名還有
         <span id="regCountdownTimer" class="countdown-timer">計算中...</span>
       </div>
-      <input type="text" id="empId" inputmode="numeric" placeholder="請輸入您的工號" autocomplete="off">
-<input type="text" id="empName" placeholder="姓名自動帶入" autocomplete="off" readonly>
+<input type="text" id="empId" inputmode="numeric" placeholder="請輸入您的工號" autocomplete="off">
+      <div id="empName" class="name-display">姓名自動帶入</div>
       <button id="regBtn" class="action-btn" onclick="submitReg()">確認報名</button>
     </div>
 
@@ -490,16 +515,17 @@
 
       const empId = empIdInput.value.trim().toUpperCase();
 
-      if (empId.length < 4) {
-        empNameInput.value = '';
-        empNameInput.placeholder = '姓名自動帶入';
+if (empId.length < 4) {
+        empNameInput.className = 'name-display';
+        empNameInput.innerText = '姓名自動帶入';
         msgEl.innerText = '';
         return;
       }
 
       lookupTimer = setTimeout(async () => {
         lookupController = new AbortController();
-        empNameInput.placeholder = '比對名單中...';
+        empNameInput.className = 'name-display';
+        empNameInput.innerText = '比對名單中...';
         msgEl.innerText = '';
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_emp_name`, {
@@ -518,26 +544,25 @@
           if (res.ok) {
             const name = await res.json();
             if (name) {
-              empNameInput.value = name;
+              empNameInput.className = 'name-display found';
+              empNameInput.innerText = `✓ 確認身分：${name}`;
             } else {
-              empNameInput.value = '';
-              empNameInput.placeholder = 'TW1 名單不符合';
+              empNameInput.className = 'name-display not-found';
+              empNameInput.innerText = '✕ TW1 名單不符合';
               msgEl.className = 'err';
               msgEl.innerText = '不符合報名資格！\n如有疑問請聯繫主辦窗口。';
             }
           }
         } catch (err) {
           if (err.name === 'AbortError') return; // 被主動中斷的舊請求直接忽略
-          empNameInput.placeholder = '比對失敗，請重試';
+          empNameInput.className = 'name-display not-found';
+          empNameInput.innerText = '比對失敗，請重試';
         }
       }, 400);
     });
 
-    // 鍵盤 Enter 捷徑
+    // 鍵盤 Enter 捷徑（輸入完工號按 Enter 直接報名）
     empIdInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') empNameInput.focus();
-    });
-    empNameInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !regBtn.disabled) submitReg();
     });
     checkinEmpIdInput.addEventListener('keydown', (e) => {
@@ -655,10 +680,10 @@ async function submitReg() {
         }
 
 const result = await response.json();
-        if (result === 'OK') {
+if (result === 'OK') {
           empIdInput.value = '';
-          empNameInput.value = '';
-          empNameInput.placeholder = '姓名自動帶入';
+          empNameInput.className = 'name-display';
+          empNameInput.innerText = '姓名自動帶入';
           switchToCheckin(empId);
           msgEl.className = 'ok';
           msgEl.innerText = `工號 ${empId} 報名成功！\n活動當天請點擊上方按鈕掃碼報到。`;
