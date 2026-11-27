@@ -428,13 +428,19 @@
     let html5QrCode = null;
     let isScanning = false;
 
-// 輸入工號自動帶出姓名（停頓 400ms 後查詢，減少無效請求）
+// 輸入工號自動帶出姓名（加入 AbortController 與工號二次比對，防止舊查詢覆蓋新結果）
     let lookupTimer = null;
+    let lookupController = null;
+
     empIdInput.addEventListener('input', () => {
       clearTimeout(lookupTimer);
+      if (lookupController) {
+        lookupController.abort(); // 使用者繼續打字時，直接中斷上一次未完成的請求
+      }
+
       const empId = empIdInput.value.trim().toUpperCase();
 
-if (empId.length < 4) {
+      if (empId.length < 4) {
         empNameInput.value = '';
         empNameInput.placeholder = '姓名自動帶入';
         msgEl.innerText = '';
@@ -442,6 +448,7 @@ if (empId.length < 4) {
       }
 
       lookupTimer = setTimeout(async () => {
+        lookupController = new AbortController();
         empNameInput.placeholder = '比對名單中...';
         msgEl.innerText = '';
         try {
@@ -451,20 +458,26 @@ if (empId.length < 4) {
               'apikey': SUPABASE_PUBLISHABLE_KEY,
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ p_emp_id: empId })
+            body: JSON.stringify({ p_emp_id: empId }),
+            signal: lookupController.signal
           });
+
+          // 回傳時再次確認輸入框內容沒變，確保絕對不會被舊結果覆蓋
+          if (empIdInput.value.trim().toUpperCase() !== empId) return;
+
           if (res.ok) {
             const name = await res.json();
             if (name) {
               empNameInput.value = name;
             } else {
               empNameInput.value = '';
-              empNameInput.placeholder = 'TW1名單不存在';
+              empNameInput.placeholder = 'TW1 名單不符合';
               msgEl.className = 'err';
               msgEl.innerText = '不符合報名資格！\n如有疑問請聯繫主辦窗口。';
             }
           }
         } catch (err) {
+          if (err.name === 'AbortError') return; // 被主動中斷的舊請求直接忽略
           empNameInput.placeholder = '比對失敗，請重試';
         }
       }, 400);
