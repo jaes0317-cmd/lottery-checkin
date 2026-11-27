@@ -7,7 +7,7 @@
 
   <!-- LINE / Teams 連結預覽資訊 -->
   <meta property="og:title" content="TW1 尾牙活動報名與現場報到">
-  <meta property="og:description" content="完成活動報名，當天現場掃描 QR Code 報到即可參加抽獎！">
+  <meta property="og:description" content="完成活動報名，當天現場掃描 QR Code 即可參加抽獎！">
   <meta property="og:type" content="website">
 
 <!-- 瀏覽器分頁小圖示 (Favicon) -->
@@ -30,7 +30,6 @@
       position: relative;
     }
 
-    /* === 彩帶特效畫布 === */
     #confettiCanvas {
       position: fixed;
       inset: 0;
@@ -40,7 +39,6 @@
       z-index: 999;
     }
 
-    /* === 強化版動態神祕煙霧層 === */
     .fog-container {
       position: fixed;
       inset: 0;
@@ -126,7 +124,6 @@
       }
     }
 
-/* === 主卡片（玻璃高光邊緣 + 0.6s 進場與流光） === */
     .card {
       position: relative;
       z-index: 1;
@@ -197,7 +194,6 @@
     .brand-logo { width: 95px; height: 32px; object-fit: contain; display: block; flex-shrink: 0; }
     .brand-text { font-size: 15px; font-weight: 600; color: #d0d4dc; line-height: 1.1; white-space: nowrap; }
 
-    /* === 頂部雙分頁切換鈕 (Segmented Tabs) === */
     .tabs {
       display: flex;
       background: rgba(0, 0, 0, 0.38);
@@ -358,18 +354,24 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .venue-link {
       display: inline-flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 2px;
       margin-top: 4px;
-      padding: 8px 14px;
+      padding: 8px 18px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 999px;
+      border-radius: 12px;
       color: #d0d4dc;
-      font-size: 13px;
+      font-size: 13.5px;
+      line-height: 1.4;
       text-decoration: none;
       transition: all 0.2s ease;
+    }
+    .venue-link .venue-sub {
+      font-size: 11.5px;
+      color: #8ab4f8;
     }
     .venue-link:hover {
       background: rgba(0, 225, 255, 0.14);
@@ -387,7 +389,6 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
 .contact-footer a { color: #8ab4f8; text-decoration: none; }
     .contact-footer a:hover { text-decoration: underline; }
 
-    /* === 報名成功：卡片光暈脈衝 + 擴散光波 === */
     .card.reg-success {
       animation: regGlow 0.85s ease-out;
     }
@@ -436,7 +437,7 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
         opacity: 0;
       }
     }
-/* 開啟相機掃碼或系統開啟減少動態時，暫停背景煙霧以節省 GPU */
+
     body.scanning .fog-blob {
       animation-play-state: paused;
     }
@@ -468,16 +469,14 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
   <div class="card">
     <div class="brand-header">
       <img src="data:image/png;base64,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" alt="DELTA" class="brand-logo" width="95" height="32" decoding="sync">
-      <span class="brand-text">TW1 尾牙活動報名</span>
+      <span class="brand-text">TW1 尾牙活動報名 (測試)</span>
     </div>
 
-    <!-- 雙分頁切換鈕 -->
     <div class="tabs">
       <button id="tabReg" class="tab-btn active" onclick="switchToReg()">1. 活動報名</button>
       <button id="tabCheckin" class="tab-btn" onclick="switchToCheckin()">2. 現場報到</button>
     </div>
 
-    <!-- ===== 畫面 1：報名表單 ===== -->
     <div id="regView">
       <h2>活動報名登記</h2>
       <div id="regCountdownBox" class="countdown-box">
@@ -492,7 +491,6 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       </div>
     </div>
 
-<!-- ===== 畫面 2：現場掃碼報到 ===== -->
     <div id="checkinView" class="hidden">
       <h2>現場掃碼報到 (參加抽獎)</h2>
       <div id="checkinCountdownBox" class="countdown-box">
@@ -510,8 +508,9 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
 
 <div id="msg"></div>
 
-    <a class="venue-link" href="https://maps.app.goo.gl/XnKsJa8LnmV7c7Y66">
-      📍 教父牛排 Danny's Steak House（點擊開啟導航）
+<a class="venue-link" href="https://share.google/8lV2ziQfu9IJ65TF1" target="_blank" rel="noopener noreferrer">
+      <span>📍 教父牛排 Danny's Steak House</span>
+      <span class="venue-sub">（點擊開啟Google Maps）</span>
     </a>
 
     <div class="contact-footer">
@@ -523,7 +522,7 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
     const SUPABASE_URL = 'https://rsvdpldicrzpfajpugzl.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hfNnuojQhFjjAvG4D1XwEA_Sj6iaZ4c';
 
-// ★ 請改成與 Supabase SQL 一致的台灣時間 (+08)
+// Supabase SQL 台灣時間 (+08)
     const REG_OPEN_TIME = new Date('2026-11-26T23:45:00+08:00');
     const REG_OPEN_TEXT = '11/26 23:45';
 
@@ -556,14 +555,13 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
     let html5QrCode = null;
     let isScanning = false;
 
-// 輸入工號自動帶出姓名（加入 AbortController 與工號二次比對，防止舊查詢覆蓋新結果）
     let lookupTimer = null;
     let lookupController = null;
 
     empIdInput.addEventListener('input', () => {
       clearTimeout(lookupTimer);
       if (lookupController) {
-        lookupController.abort(); // 使用者繼續打字時，直接中斷上一次未完成的請求
+        lookupController.abort();
       }
 
       const empId = empIdInput.value.trim().toUpperCase();
@@ -591,7 +589,6 @@ if (empId.length < 4) {
             signal: lookupController.signal
           });
 
-          // 回傳時再次確認輸入框內容沒變，確保絕對不會被舊結果覆蓋
           if (empIdInput.value.trim().toUpperCase() !== empId) return;
 
           if (res.ok) {
@@ -614,7 +611,6 @@ if (empId.length < 4) {
       }, 400);
     });
 
-    // 鍵盤 Enter 捷徑（輸入完工號按 Enter 直接報名）
     empIdInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !regBtn.disabled) submitReg();
     });
@@ -886,7 +882,6 @@ readerEl.style.display = 'none';
       }
     }
 
-    // === 輕量級 Canvas 彩帶特效 ===
     function launchConfetti() {
       const canvas = document.getElementById('confettiCanvas');
       const ctx = canvas.getContext('2d');
@@ -914,8 +909,8 @@ readerEl.style.display = 'none';
         particles.forEach((p) => {
           p.x += p.vx;
           p.y += p.vy;
-          p.vy += 0.35; // 重力
-          p.vx *= 0.99; // 空氣阻力
+          p.vy += 0.35;
+          p.vx *= 0.99;
           p.rotation += p.vRot;
           if (frame > 45) p.opacity -= 0.02;
 
@@ -941,12 +936,11 @@ if (active) {
       animate();
     }
 
-    // === 報名成功：科技光波與卡片脈衝特效 ===
     function triggerRegSuccessEffect() {
       const card = document.querySelector('.card');
       if (card) {
         card.classList.remove('reg-success');
-        void card.offsetWidth; // 強制重繪，支援重複觸發
+        void card.offsetWidth;
         card.classList.add('reg-success');
       }
 
