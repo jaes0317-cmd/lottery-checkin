@@ -455,6 +455,92 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       color: #ffd43b;
       line-height: 1.5;
     }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .modal-box {
+      width: 100%;
+      max-width: 330px;
+      background: rgba(24, 28, 38, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      padding: 22px 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+      text-align: center;
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 14px;
+    }
+    .modal-info {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #d0d4dc;
+    }
+    .modal-info strong {
+      color: #20c997;
+      font-size: 16px;
+    }
+    .modal-warn {
+      font-size: 12.5px;
+      color: #ffd43b;
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .modal-actions button {
+      flex: 1;
+      padding: 11px 0;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-btn-cancel {
+      background: rgba(255, 255, 255, 0.1);
+      color: #d0d4dc;
+    }
+    .modal-btn-confirm {
+      background: #0d6efd;
+      color: #ffffff;
+    }
+    .modal-actions button:active { opacity: 0.8; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes popIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -485,7 +571,7 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       </div>
 <input type="text" id="empId" inputmode="numeric" placeholder="請輸入您的工號" autocomplete="off">
       <div id="empName" class="name-display">姓名自動帶入</div>
-<button id="regBtn" class="action-btn" onclick="submitReg()">確認報名</button>
+<button id="regBtn" class="action-btn" onclick="openConfirmModal()">確認報名</button>
 <div class="reg-notice">
         ⚠️ 提醒：未經本人同意請勿擅自代為報名，<br>以免影響活動人數統計。
       </div>
@@ -515,6 +601,23 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
 
     <div class="contact-footer">
       系統聯繫窗口：<a href="mailto:james.zc.hsu@deltaww.com">james.zc.hsu@deltaww.com</a>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal-overlay" onclick="if(event.target === this) closeConfirmModal()">
+    <div class="modal-box">
+      <div class="modal-title">請再次確認報名資訊</div>
+      <div class="modal-info">
+        工號：<strong id="modalEmpId"></strong><br>
+        姓名：<strong id="modalEmpName"></strong>
+      </div>
+      <div class="modal-warn">
+        送出後即計入活動桌數統計，<br>請確認為本人意願後再送出。
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-cancel" onclick="closeConfirmModal()">返回修改</button>
+        <button type="button" class="modal-btn-confirm" onclick="confirmAndSubmit()">確定送出</button>
+      </div>
     </div>
   </div>
 
@@ -604,7 +707,7 @@ if (empId.length < 4) {
             }
           }
         } catch (err) {
-          if (err.name === 'AbortError') return; // 被主動中斷的舊請求直接忽略
+          if (err.name === 'AbortError') return;
           empNameInput.className = 'name-display not-found';
           empNameInput.innerText = '比對失敗，請重試';
         }
@@ -612,7 +715,7 @@ if (empId.length < 4) {
     });
 
     empIdInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !regBtn.disabled) submitReg();
+      if (e.key === 'Enter' && !regBtn.disabled) openConfirmModal();
     });
     checkinEmpIdInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !checkinBtn.disabled) startScanner();
@@ -950,6 +1053,47 @@ if (active) {
         document.body.appendChild(ring);
         ring.addEventListener('animationend', () => ring.remove());
       });
+    }
+
+    function openConfirmModal() {
+      const now = new Date();
+      if (now < REG_OPEN_TIME) {
+        msgEl.className = 'err';
+        msgEl.innerText = `尚未開放報名，\n將於 ${REG_OPEN_TEXT} 準時開放！`;
+        return;
+      }
+      if (now > REG_CLOSE_TIME) {
+        msgEl.className = 'err';
+        msgEl.innerText = `活動報名已於 ${REG_CLOSE_TEXT} 截止！\n如有疑問請聯繫主辦窗口。`;
+        return;
+      }
+
+      const empId = empIdInput.value.trim().toUpperCase();
+      if (!empId) {
+        msgEl.className = 'err';
+        msgEl.innerText = '請先輸入您的工號！';
+        empIdInput.focus();
+        return;
+      }
+      if (!empNameInput.classList.contains('found')) {
+        msgEl.className = 'err';
+        msgEl.innerText = '請先確認工號已通過名單驗證！';
+        return;
+      }
+
+      const displayName = empNameInput.innerText.replace('✓ 確認身分：', '').trim();
+      document.getElementById('modalEmpId').innerText = empId;
+      document.getElementById('modalEmpName').innerText = displayName;
+      document.getElementById('confirmModal').classList.add('show');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.remove('show');
+    }
+
+    function confirmAndSubmit() {
+      closeConfirmModal();
+      submitReg();
     }
   </script>
 </body>
