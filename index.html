@@ -601,6 +601,14 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
         background: rgba(20, 24, 34, 0.92);
       }
     }
+.emoji-fix {
+      display: inline-block;
+    }
+    @media (min-width: 769px) {
+      .emoji-fix {
+        transform: translateY(-2px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -641,7 +649,7 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
             <span>未經本人同意請勿擅自代為報名，<br>以免影響活動人數統計。</span>
           </div>
           <div class="notice-row">
-            <span class="notice-label">🪪&nbsp;</span>
+            <span class="notice-label"><span class="emoji-fix">🪪</span>&nbsp;</span>
             <span>活動當天請務必攜帶識別證以利核對。</span>
           </div>
         </div>
@@ -656,7 +664,7 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       </div>
       <input type="text" id="checkinEmpId" inputmode="numeric" placeholder="請輸入您已報名的工號" autocomplete="off">
 
-      <button id="checkinBtn" class="action-btn btn-green" onclick="startScanner()">📷 我要報到（掃描 QR Code）</button>
+<button id="checkinBtn" class="action-btn btn-green" onclick="startScanner()"><span class="emoji-fix">📷</span> 我要報到（掃描 QR Code）</button>
 
       <!-- 相機掃描區塊 -->
       <div id="reader"></div>
@@ -703,7 +711,7 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
     const REG_OPEN_TIME = new Date('2026-11-27T21:30:00+08:00');
     const REG_OPEN_TEXT = '11/27 21:30';
 
-const REG_CLOSE_TIME = new Date('2026-11-27T22:00:59+08:00');
+const REG_CLOSE_TIME = new Date('2026-11-27T22:00:00+08:00');
     const REG_CLOSE_TEXT = '11/27 22:00';
 document.getElementById('regDeadlineText').innerText = `⏳ 報名截止：${REG_CLOSE_TEXT}`;
 
@@ -841,9 +849,9 @@ const regDiff = REG_OPEN_TIME - now;
       } else {
         checkinCountdownBox.style.display = 'none';
         checkinEmpIdInput.disabled = false;
-        if (!isSubmitting && !isScanning) {
+if (!isSubmitting && !isScanning) {
           checkinBtn.disabled = false;
-          checkinBtn.innerText = '📷 我要報到（掃描 QR Code）';
+          checkinBtn.innerHTML = '<span class="emoji-fix">📷</span> 我要報到（掃描 QR Code）';
         }
       }
     }
