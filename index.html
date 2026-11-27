@@ -445,15 +445,30 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       .fog-blob { animation: none; }
     }
 
-    .reg-notice {
+.reg-notice {
       margin-top: 12px;
-      padding: 8px 12px;
+      padding: 10px 14px;
       background: rgba(255, 193, 7, 0.08);
       border: 1px solid rgba(255, 193, 7, 0.25);
       border-radius: 8px;
       font-size: 12.5px;
       color: #ffd43b;
       line-height: 1.5;
+      text-align: left;
+    }
+    .notice-inner {
+      width: fit-content;
+      margin: 0 auto;
+    }
+    .notice-row {
+      display: flex;
+      align-items: flex-start;
+    }
+    .notice-row + .notice-row {
+      margin-top: 4px;
+    }
+    .notice-label {
+      flex-shrink: 0;
     }
 
     .modal-overlay {
@@ -620,8 +635,16 @@ input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
       <div id="empName" class="name-display">姓名自動帶入</div>
 <button id="regBtn" class="action-btn" onclick="openConfirmModal()">確認報名</button>
 <div class="reg-notice">
-        ⚠️ 提醒：未經本人同意請勿擅自代為報名，<br>以免影響活動人數統計。<br>
-        🪪 活動當天請務必攜帶識別證以利核對。
+        <div class="notice-inner">
+          <div class="notice-row">
+            <span class="notice-label">⚠️ 提醒：</span>
+            <span>未經本人同意請勿擅自代為報名，<br>以免影響活動人數統計。</span>
+          </div>
+          <div class="notice-row">
+            <span class="notice-label">🪪&nbsp;</span>
+            <span>活動當天請務必攜帶識別證以利核對。</span>
+          </div>
+        </div>
       </div>
     </div>
 
